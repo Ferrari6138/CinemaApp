@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${filme.id != null ? 'Editar ' + filme.titulo : 'Novo Filme'}"></title>
+    <link rel="stylesheet" href="/css/style.css">  <!-- Link para o CSS, caso tenha -->
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${filme.id != null ? 'Editar ' + filme.titulo : 'Novo Filme'}"></h1>
+
+    <form th:action="@{/filmes}" method="post">
+        <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label>
+            <input type="text" class="form-control" id="titulo" name="titulo" th:value="${filme.titulo}" required>
+        </div>
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea class="form-control" id="descricao" name="descricao" th:value="${filme.descricao}" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="horario" class="form-label">Horário</label>
+            <input type="time" class="form-control" id="horario" name="horario" th:value="${filme.horario}" required>
+        </div>
+        <div class="mb-3">
+            <label for="duracao" class="form-label">Duração (minutos)</label>
+            <input type="number" class="form-control" id="duracao" name="duracao" th:value="${filme.duracao}" required>
+        </div>
+        <div class="mb-3">
+            <label for="classificacao" class="form-label">Classificação</label>
+            <input type="text" class="form-control" id="classificacao" name="classificacao" th:value="${filme.classificacao}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</div>
+
+</body>
+</html>

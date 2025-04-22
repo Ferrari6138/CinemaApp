@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${#strings.isEmpty(title) ? 'CinemaApp' : title + ' - CinemaApp'}"></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<header th:fragment="header">
+    <div class="container">
+        <div id="branding">
+            <h1><a th:href="@{/}">CinemaApp</a></h1>
+        </div>
+        <nav>
+            <ul>
+                <li th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/filmes}">Filmes</a>
+                </li>
+                <li th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/reservas}">Minhas Reservas</a>
+                </li>
+                <li th:if="${#authorization.expression('isAuthenticated()')}">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit">Sair</button>
+                    </form>
+                </li>
+                <li th:unless="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/login}">Login</a>
+                </li>
+                <li th:unless="${#authorization.expression('isAuthenticated()')}">
+                    <a th:href="@{/register}">Registrar</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
