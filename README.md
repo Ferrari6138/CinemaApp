@@ -8,6 +8,9 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 - Proteção de rotas com Spring Security
 - Listagem de filmes disponíveis
 - Visualização de detalhes de filmes
+- Cadastro de novos filmes
+- Edição de filmes cadastrados
+- Deleção de filmes cadastrados
 - Formulário de reserva com seleção de quantidade
 - Listagem de reservas por usuário
 - Cancelamento de reservas (status atualizado no banco de dados)
@@ -16,10 +19,6 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 
 ## 🔧 Funcionalidades em desenvolvimento
 
-- [ ] Deletar filme
-- [ ] Editar filme
-- [ ] Salvar filme no formulário de cadastro
-- [ ] Exibir formulário de novo filme (administrativo)
 - [ ] Definir e calcular valor do ingresso por filme
 - [ ] Buscar filme por filtros como título, horário ou classificação
 - [ ] Corrigir função de mostrar/ocultar senha no formulário de registro
