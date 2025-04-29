@@ -23,6 +23,7 @@
             <div th:if="${#fields.hasErrors('email')}" class="text-danger" th:errors="*{email}"></div>
         </div>
 
+        <!-- Register.html - Campo de senha com botão para mostrar/ocultar senha -->
         <div class="mb-3">
             <label for="password" class="form-label">Senha:</label>
             <div class="input-group">
@@ -32,6 +33,7 @@
             <div th:if="${#fields.hasErrors('senha')}" class="text-danger" th:errors="*{senha}"></div>
         </div>
 
+
         <button type="submit" class="btn btn-primary">Registrar</button>
     </form>
 
@@ -40,7 +42,7 @@
     </p>
 </div>
 
-<!-- Incluindo seu script global -->
-<script src="/static/js/scripts.js"></script>
+<script th:src="@{/js/scripts.js}"></script>
+
 </body>
 </html>

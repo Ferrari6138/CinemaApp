@@ -2,6 +2,7 @@ package com.cinemaapp.controllers;
 
 import com.cinemaapp.models.Filme;
 import com.cinemaapp.service.FilmeService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,18 +23,21 @@ public class FilmeController {
         return "filmes/list";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/novo")
     public String mostrarFormularioNovoFilme(Model model) {
         model.addAttribute("filme", new Filme());
         return "filmes/form";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/novo")
     public String salvarFilme(@ModelAttribute Filme filme) {
         filmeService.save(filme);
         return "redirect:/filmes";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
         Filme filme = filmeService.findById(id).orElse(null);
@@ -45,6 +49,7 @@ public class FilmeController {
         return "filmes/form";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/editar/{id}")
     public String atualizarFilme(@PathVariable Long id, @ModelAttribute Filme filmeAtualizado) {
         Filme filmeExistente = filmeService.findById(id).orElse(null);
@@ -63,7 +68,7 @@ public class FilmeController {
         return "redirect:/filmes";
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deletar")
     public String deletarFilme(@PathVariable Long id) {
         filmeService.deleteById(id);

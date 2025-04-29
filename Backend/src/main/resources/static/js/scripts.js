@@ -3,7 +3,7 @@ function confirmDelete() {
 }
 
 function togglePassword() {
-    const passwordField = document.getElementById('password');
+    const passwordField = document.getElementById('password'); // Corrigido aqui
     const toggleBtn = document.querySelector('.toggle-password');
 
     if (passwordField.type === 'password') {
@@ -15,7 +15,11 @@ function togglePassword() {
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.querySelector('.toggle-password');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', togglePassword);
+    }
+
     console.log('Aplicação CinemaApp carregada');
 });

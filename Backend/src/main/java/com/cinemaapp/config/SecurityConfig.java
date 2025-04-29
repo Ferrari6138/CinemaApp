@@ -27,9 +27,11 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/resources/**", "/css/**", "/js/**").permitAll()
-                        .requestMatchers("/filmes/**", "/reservas/**").permitAll()
+                        .requestMatchers("/filmes/novo", "/filmes/editar/**", "/filmes/*/deletar").hasRole("ADMIN")
+                        .requestMatchers("/filmes/**", "/reservas/**").authenticated()
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
@@ -50,6 +52,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
 
 
