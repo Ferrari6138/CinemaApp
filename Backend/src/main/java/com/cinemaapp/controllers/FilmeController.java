@@ -6,6 +6,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 @Controller
 @RequestMapping("/filmes")
@@ -32,10 +39,21 @@ public class FilmeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/novo")
-    public String salvarFilme(@ModelAttribute Filme filme) {
+    public String salvarFilme(@ModelAttribute Filme filme,
+                              @RequestParam("file") MultipartFile file) throws IOException {
+
+        if (!file.isEmpty()) {
+            String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path caminho = Paths.get("src/main/resources/static/uploads/" + nomeArquivo);
+            Files.createDirectories(caminho.getParent());
+            file.transferTo(caminho);
+            filme.setImagem(nomeArquivo);
+        }
+
         filmeService.save(filme);
         return "redirect:/filmes";
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/editar/{id}")
@@ -51,22 +69,30 @@ public class FilmeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/editar/{id}")
-    public String atualizarFilme(@PathVariable Long id, @ModelAttribute Filme filmeAtualizado) {
+    public String atualizarFilme(@PathVariable Long id,
+                                 @ModelAttribute Filme filmeAtualizado,
+                                 @RequestParam("file") MultipartFile file) throws IOException {
         Filme filmeExistente = filmeService.findById(id).orElse(null);
-        if (filmeExistente == null) {
-            return "redirect:/filmes"; // Se o filme não existir, volta pra lista
-        }
+        if (filmeExistente == null) return "redirect:/filmes";
 
-        // Atualizar os campos
         filmeExistente.setTitulo(filmeAtualizado.getTitulo());
         filmeExistente.setDescricao(filmeAtualizado.getDescricao());
         filmeExistente.setHorario(filmeAtualizado.getHorario());
         filmeExistente.setDuracao(filmeAtualizado.getDuracao());
         filmeExistente.setClassificacao(filmeAtualizado.getClassificacao());
 
+        if (!file.isEmpty()) {
+            String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path caminho = Paths.get("src", "main", "resources", "static", "uploads", nomeArquivo);
+            Files.createDirectories(caminho.getParent());
+            file.transferTo(caminho);
+            filmeExistente.setImagem(nomeArquivo);
+        }
+
         filmeService.save(filmeExistente);
         return "redirect:/filmes";
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deletar")

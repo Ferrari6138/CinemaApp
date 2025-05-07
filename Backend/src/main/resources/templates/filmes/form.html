@@ -10,9 +10,15 @@
 
     <form th:action="${filme.id} == null ? @{/filmes/novo} : @{/filmes/editar/{id}(id=${filme.id})}"
           th:object="${filme}"
-          method="post">
+          method="post"
+          enctype="multipart/form-data">
 
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div class="mb-3">
+            <label for="imagem" class="form-label">Imagem de Capa:</label>
+            <input type="file" name="file" class="form-control" id="imagem">
+        </div>
 
         <div class="mb-3">
             <label for="titulo" class="form-label">Título:</label>

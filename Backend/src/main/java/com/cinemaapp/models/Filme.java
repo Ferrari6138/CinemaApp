@@ -24,6 +24,8 @@ public class Filme {
     private Integer duracao; // em minutos
     private String classificacao;
 
+    private String imagem;
+
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reserva> reservas;
 
@@ -76,6 +78,10 @@ public class Filme {
     public void setClassificacao(String classificacao) {
         this.classificacao = classificacao;
     }
+
+    public String getImagem() { return imagem; }
+
+    public void setImagem(String imagem) { this.imagem = imagem; }
 
     public List<Reserva> getReservas() {
         return reservas;

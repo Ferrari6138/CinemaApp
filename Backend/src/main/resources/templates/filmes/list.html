@@ -17,6 +17,7 @@
     <table class="table table-striped table-bordered">
         <thead class="table-dark">
         <tr>
+            <th>Capa</th>
             <th>Título</th>
             <th>Descrição</th>
             <th>Horário</th>
@@ -25,6 +26,9 @@
         </thead>
         <tbody>
         <tr th:each="filme : ${filmes}">
+            <td>
+                <img th:src="@{'/uploads/' + ${filme.imagem}}" alt="Capa" width="100" class="img-thumbnail">
+            </td>
             <td th:text="${filme.titulo}"></td>
             <td th:text="${filme.descricao}"></td>
             <td th:text="${filme.horario}"></td>
