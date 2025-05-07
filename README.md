@@ -6,11 +6,12 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 
 - Cadastro e login de usuários com senha criptografada (BCrypt)
 - Proteção de rotas com Spring Security
-- Listagem de filmes disponíveis
-- Visualização de detalhes de filmes
+- Listagem de filmes disponíveis com capas ilustrativas
+- Visualização de detalhes de filmes com layout aprimorado
 - Cadastro de novos filmes (apenas ADMIN)
 - Edição e deleção de filmes (apenas ADMIN)
-- Deleção de filmes cadastrados(apenas ADMIN)
+- Deleção de filmes cadastrados (apenas ADMIN)
+- Upload de imagens dos filmes com armazenamento local
 - Formulário de reserva com seleção de quantidade
 - Listagem de reservas por usuário
 - Cancelamento de reservas (status atualizado no banco de dados)
@@ -24,7 +25,6 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 - [ ] Buscar filme por filtros como título, horário ou classificação
 - [ ] Painel de administração mais robusto
 - [ ] Página de perfil do usuário com histórico de reservas
-- [ ] Upload de imagens dos filmes
 - [ ] Validações avançadas nos formulários
 
 ## 🔒 Regras de acesso
