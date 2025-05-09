@@ -12,6 +12,8 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 - Edição e deleção de filmes (apenas ADMIN)
 - Deleção de filmes cadastrados (apenas ADMIN)
 - Upload de imagens dos filmes com armazenamento local
+- Definição e cálculo do valor do ingresso por filme
+- Exibição do valor total da reserva de acordo com a quantidade de ingressos
 - Formulário de reserva com seleção de quantidade
 - Listagem de reservas por usuário
 - Cancelamento de reservas (status atualizado no banco de dados)
@@ -21,11 +23,11 @@ Um sistema web de gerenciamento de cinema com autenticação de usuários, cadas
 
 ## 🔧 Funcionalidades em desenvolvimento
 
-- [ ] Definir e calcular valor do ingresso por filme
 - [ ] Buscar filme por filtros como título, horário ou classificação
 - [ ] Painel de administração mais robusto
 - [ ] Página de perfil do usuário com histórico de reservas
 - [ ] Validações avançadas nos formulários
+- [ ] Melhorias na visualização das reservas para o usuário
 
 ## 🔒 Regras de acesso
 
