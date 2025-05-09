@@ -18,6 +18,7 @@
                 <p><strong>Horário:</strong> <span th:text="${filme.horario}"></span></p>
                 <p><strong>Duração:</strong> <span th:text="${filme.duracao} + ' min'"></span></p>
                 <p><strong>Classificação:</strong> <span th:text="${filme.classificacao}"></span></p>
+                <p><strong>Preço:</strong> R$ <span th:text="${filme.precoFormatado}"></span></p>
 
                 <div class="mt-3">
                     <a th:href="@{/reservas/nova/{id}(id=${filme.id})}" class="btn btn-primary">Reservar Ingresso</a>

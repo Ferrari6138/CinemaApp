@@ -1,6 +1,8 @@
 package com.cinemaapp.models;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -25,6 +27,8 @@ public class Filme {
     private String classificacao;
 
     private String imagem;
+
+    private BigDecimal preco;
 
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reserva> reservas;
@@ -83,6 +87,17 @@ public class Filme {
 
     public void setImagem(String imagem) { this.imagem = imagem; }
 
+    // Getter e Setter para o preço
+    public BigDecimal getPreco() {
+        return preco;
+    }
+
+    public void setPreco(BigDecimal preco) {
+        this.preco = preco;
+    }
+
+
+
     public List<Reserva> getReservas() {
         return reservas;
     }
@@ -101,5 +116,13 @@ public class Filme {
                 ", duracao=" + duracao +
                 ", classificacao='" + classificacao + '\'' +
                 '}';
+    }
+
+    // Método auxiliar para exibir o preço formatado
+    public String getPrecoFormatado() {
+        if (preco != null) {
+            return String.format("%.2f", preco).replace(".", ",");
+        }
+        return "0,00";
     }
 }

@@ -7,12 +7,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.List;
 
 @Controller
 @RequestMapping("/filmes")
@@ -24,12 +25,15 @@ public class FilmeController {
         this.filmeService = filmeService;
     }
 
+    // Listar todos os filmes
     @GetMapping
     public String listarFilmes(Model model) {
-        model.addAttribute("filmes", filmeService.findAll());
+        List<Filme> filmes = filmeService.findAll();
+        model.addAttribute("filmes", filmes);
         return "filmes/list";
     }
 
+    // Formulário para novo filme
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/novo")
     public String mostrarFormularioNovoFilme(Model model) {
@@ -37,10 +41,16 @@ public class FilmeController {
         return "filmes/form";
     }
 
+    // Salvar novo filme
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/novo")
     public String salvarFilme(@ModelAttribute Filme filme,
-                              @RequestParam("file") MultipartFile file) throws IOException {
+                              @RequestParam("file") MultipartFile file,
+                              @RequestParam("preco") String precoStr) throws IOException {
+
+        // Conversão segura do preço para BigDecimal
+        BigDecimal preco = convertToBigDecimal(precoStr);
+        filme.setPreco(preco);
 
         if (!file.isEmpty()) {
             String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -54,7 +64,7 @@ public class FilmeController {
         return "redirect:/filmes";
     }
 
-
+    // Formulário de edição de filme
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
@@ -67,13 +77,20 @@ public class FilmeController {
         return "filmes/form";
     }
 
+    // Atualizar filme existente
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/editar/{id}")
     public String atualizarFilme(@PathVariable Long id,
                                  @ModelAttribute Filme filmeAtualizado,
-                                 @RequestParam("file") MultipartFile file) throws IOException {
+                                 @RequestParam("file") MultipartFile file,
+                                 @RequestParam("preco") String precoStr) throws IOException {
+
         Filme filmeExistente = filmeService.findById(id).orElse(null);
         if (filmeExistente == null) return "redirect:/filmes";
+
+        // Conversão segura do preço para BigDecimal
+        BigDecimal preco = convertToBigDecimal(precoStr);
+        filmeExistente.setPreco(preco);
 
         filmeExistente.setTitulo(filmeAtualizado.getTitulo());
         filmeExistente.setDescricao(filmeAtualizado.getDescricao());
@@ -93,7 +110,7 @@ public class FilmeController {
         return "redirect:/filmes";
     }
 
-
+    // Deletar filme
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deletar")
     public String deletarFilme(@PathVariable Long id) {
@@ -101,6 +118,7 @@ public class FilmeController {
         return "redirect:/filmes";
     }
 
+    // Detalhes do filme
     @GetMapping("/{id}")
     public String detalhesFilme(@PathVariable Long id, Model model) {
         Filme filme = filmeService.findById(id).orElse(null);
@@ -110,5 +128,14 @@ public class FilmeController {
         }
         model.addAttribute("filme", filme);
         return "filmes/detalhes";
+    }
+
+    // Método auxiliar para converter para BigDecimal
+    private BigDecimal convertToBigDecimal(String value) {
+        try {
+            return new BigDecimal(value.replace(",", "."));
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
     }
 }

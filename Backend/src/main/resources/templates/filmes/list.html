@@ -21,6 +21,7 @@
             <th>Título</th>
             <th>Descrição</th>
             <th>Horário</th>
+            <th>Preço (R$)</th>
             <th>Ações</th>
         </tr>
         </thead>
@@ -32,6 +33,7 @@
             <td th:text="${filme.titulo}"></td>
             <td th:text="${filme.descricao}"></td>
             <td th:text="${filme.horario}"></td>
+            <td th:text="${filme.precoFormatado} + ' R$'"></td>
             <td>
                 <div class="d-flex flex-column flex-md-row gap-1">
                     <a th:href="@{/filmes/{id}(id=${filme.id})}" class="btn btn-info btn-sm w-100">🔍 Detalhes</a>

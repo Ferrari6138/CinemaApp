@@ -45,6 +45,12 @@
             <input type="text" id="classificacao" th:field="*{classificacao}" class="form-control" required>
         </div>
 
+        <div class="mb-3">
+            <label for="preco" class="form-label">Preço (R$):</label>
+            <input type="text" id="preco" th:field="*{preco}" placeholder="Ex: 15,50" class="form-control" required>
+        </div>
+
+
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a th:href="@{/filmes}" class="btn btn-secondary ms-2">Cancelar</a>
     </form>
