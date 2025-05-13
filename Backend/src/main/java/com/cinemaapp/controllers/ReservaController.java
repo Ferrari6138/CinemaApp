@@ -2,6 +2,7 @@ package com.cinemaapp.controllers;
 
 import com.cinemaapp.models.Reserva;
 import com.cinemaapp.service.ReservaService;
+import com.cinemaapp.service.UsuarioService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +18,13 @@ public class ReservaController {
 
     private final ReservaService reservaService;
     private final FilmeService filmeService;
+    private UsuarioService usuarioService;
+
 
     public ReservaController(ReservaService reservaService, FilmeService filmeService) {
         this.reservaService = reservaService;
         this.filmeService = filmeService;
+        this.usuarioService = usuarioService;
         ;
     }
 

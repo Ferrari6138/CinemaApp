@@ -39,6 +39,10 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reserva> reservas;
 
+    @Column(nullable = true)
+    private String avatar;
+
+
     public Usuario() {
     }
 
@@ -80,6 +84,10 @@ public class Usuario implements UserDetails {
     public void setSenha(String senha) {
         this.senha = senha;
     }
+
+    public String getAvatar() {return avatar;}
+
+    public void setAvatar(String avatar) {this.avatar = avatar;}
 
     public String getRole() {
         return role;

@@ -1,8 +1,12 @@
 package com.cinemaapp.controllers;
 
 import com.cinemaapp.models.Filme;
+import com.cinemaapp.models.Usuario;
 import com.cinemaapp.service.FilmeService;
+import com.cinemaapp.service.UsuarioService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +24,25 @@ import java.util.List;
 public class FilmeController {
 
     private final FilmeService filmeService;
+    private final UsuarioService usuarioService;
 
-    public FilmeController(FilmeService filmeService) {
+    public FilmeController(FilmeService filmeService, UsuarioService usuarioService) {
         this.filmeService = filmeService;
+        this.usuarioService = usuarioService;
+    }
+
+    // Método para obter o usuário autenticado
+    private Usuario getAuthenticatedUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return usuarioService.findByEmail(email).orElse(null);
     }
 
     // Listar todos os filmes
     @GetMapping
     public String listarFilmes(Model model) {
+        Usuario usuario = getAuthenticatedUser();
+        model.addAttribute("user", usuario);
         List<Filme> filmes = filmeService.findAll();
         model.addAttribute("filmes", filmes);
         return "filmes/list";
@@ -37,6 +52,8 @@ public class FilmeController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/novo")
     public String mostrarFormularioNovoFilme(Model model) {
+        Usuario usuario = getAuthenticatedUser();
+        model.addAttribute("user", usuario);
         model.addAttribute("filme", new Filme());
         return "filmes/form";
     }
@@ -44,11 +61,7 @@ public class FilmeController {
     // Salvar novo filme
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/novo")
-    public String salvarFilme(@ModelAttribute Filme filme,
-                              @RequestParam("file") MultipartFile file,
-                              @RequestParam("preco") String precoStr) throws IOException {
-
-        // Conversão segura do preço para BigDecimal
+    public String salvarFilme(@ModelAttribute Filme filme, @RequestParam("file") MultipartFile file, @RequestParam("preco") String precoStr) throws IOException {
         BigDecimal preco = convertToBigDecimal(precoStr);
         filme.setPreco(preco);
 
@@ -68,6 +81,8 @@ public class FilmeController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
+        Usuario usuario = getAuthenticatedUser();
+        model.addAttribute("user", usuario);
         Filme filme = filmeService.findById(id).orElse(null);
         if (filme == null) {
             model.addAttribute("error", "Filme não encontrado para edição!");
@@ -80,18 +95,12 @@ public class FilmeController {
     // Atualizar filme existente
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/editar/{id}")
-    public String atualizarFilme(@PathVariable Long id,
-                                 @ModelAttribute Filme filmeAtualizado,
-                                 @RequestParam("file") MultipartFile file,
-                                 @RequestParam("preco") String precoStr) throws IOException {
-
+    public String atualizarFilme(@PathVariable Long id, @ModelAttribute Filme filmeAtualizado, @RequestParam("file") MultipartFile file, @RequestParam("preco") String precoStr) throws IOException {
         Filme filmeExistente = filmeService.findById(id).orElse(null);
         if (filmeExistente == null) return "redirect:/filmes";
 
-        // Conversão segura do preço para BigDecimal
         BigDecimal preco = convertToBigDecimal(precoStr);
         filmeExistente.setPreco(preco);
-
         filmeExistente.setTitulo(filmeAtualizado.getTitulo());
         filmeExistente.setDescricao(filmeAtualizado.getDescricao());
         filmeExistente.setHorario(filmeAtualizado.getHorario());
@@ -121,6 +130,8 @@ public class FilmeController {
     // Detalhes do filme
     @GetMapping("/{id}")
     public String detalhesFilme(@PathVariable Long id, Model model) {
+        Usuario usuario = getAuthenticatedUser();
+        model.addAttribute("user", usuario);
         Filme filme = filmeService.findById(id).orElse(null);
         if (filme == null) {
             model.addAttribute("error", "Filme não encontrado!");

@@ -26,10 +26,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/uploads/**", "/css/**", "/js/**", "/images/**").permitAll()  // Libera acesso às imagens e recursos estáticos
+                        .requestMatchers("/uploads/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/filmes/novo", "/filmes/editar/**", "/filmes/*/deletar").hasRole("ADMIN")
-                        .requestMatchers("/filmes/**", "/reservas/**").authenticated()
+                        .requestMatchers("/filmes/**", "/reservas/**", "/usuarios/**", "/usuarios/perfil", "/usuarios/configuracoes").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
