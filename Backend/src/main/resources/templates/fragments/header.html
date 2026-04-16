@@ -29,7 +29,7 @@
                                  th:src="@{/uploads/{avatar}(avatar=${user.avatar})}"
                                  alt="Avatar" class="rounded-circle" width="30" height="30">
                             <img th:if="${user.avatar == null}"
-                                 th:src="@{/js/uploads/default-avatar.jpg}"
+                                 th:src="@{/uploads/default-avatar.jpg}"
                                  alt="Avatar" class="rounded-circle" width="30" height="30">
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

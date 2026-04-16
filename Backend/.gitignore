@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Uploads gerados dinamicamente ###
+src/main/resources/static/uploads/*
+!src/main/resources/static/uploads/default-avatar.jpg
