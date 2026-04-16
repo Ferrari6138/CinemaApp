@@ -1,9 +1,12 @@
 package com.cinemaapp.controllers;
 
 import com.cinemaapp.models.Filme;
+import com.cinemaapp.models.Genero;
 import com.cinemaapp.models.Usuario;
+import com.cinemaapp.repository.GeneroRepository;
 import com.cinemaapp.service.FilmeService;
 import com.cinemaapp.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,124 +29,151 @@ public class FilmeController {
 
     private final FilmeService filmeService;
     private final UsuarioService usuarioService;
+    private final GeneroRepository generoRepository;
 
-    public FilmeController(FilmeService filmeService, UsuarioService usuarioService) {
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
+    public FilmeController(FilmeService filmeService, UsuarioService usuarioService, GeneroRepository generoRepository) {
         this.filmeService = filmeService;
         this.usuarioService = usuarioService;
+        this.generoRepository = generoRepository;
     }
 
-    // Método para obter o usuário autenticado
     private Usuario getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return usuarioService.findByEmail(email).orElse(null);
+        return usuarioService.findByEmail(auth.getName()).orElse(null);
     }
 
-    // Listar todos os filmes
     @GetMapping
-    public String listarFilmes(Model model) {
+    public String listarFilmes(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long generoId,
+            Model model) {
         Usuario usuario = getAuthenticatedUser();
         model.addAttribute("user", usuario);
-        List<Filme> filmes = filmeService.findAll();
+
+        List<Filme> filmes;
+        if (generoId != null) {
+            filmes = filmeService.findByGenero(generoId);
+        } else if (q != null && !q.isBlank()) {
+            filmes = filmeService.search(q);
+        } else {
+            filmes = filmeService.findAll();
+        }
+
         model.addAttribute("filmes", filmes);
+        model.addAttribute("generos", generoRepository.findAll());
+        model.addAttribute("q", q);
+        model.addAttribute("generoId", generoId);
         return "filmes/list";
     }
 
-    // Formulário para novo filme
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/novo")
     public String mostrarFormularioNovoFilme(Model model) {
-        Usuario usuario = getAuthenticatedUser();
-        model.addAttribute("user", usuario);
+        model.addAttribute("user", getAuthenticatedUser());
         model.addAttribute("filme", new Filme());
+        model.addAttribute("generos", generoRepository.findAll());
         return "filmes/form";
     }
 
-    // Salvar novo filme
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/novo")
-    public String salvarFilme(@ModelAttribute Filme filme, @RequestParam("file") MultipartFile file, @RequestParam("preco") String precoStr) throws IOException {
-        BigDecimal preco = convertToBigDecimal(precoStr);
-        filme.setPreco(preco);
+    public String salvarFilme(
+            @ModelAttribute Filme filme,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("preco") String precoStr,
+            @RequestParam(value = "generoIds", required = false) List<Long> generoIds,
+            RedirectAttributes ra) throws IOException {
+
+        filme.setPreco(parseBigDecimal(precoStr));
 
         if (!file.isEmpty()) {
             String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path caminho = Paths.get("src/main/resources/static/uploads/" + nomeArquivo);
+            Path caminho = Paths.get(uploadDir + nomeArquivo);
             Files.createDirectories(caminho.getParent());
             file.transferTo(caminho);
             filme.setImagem(nomeArquivo);
         }
 
+        if (generoIds != null) {
+            filme.setGeneros(generoRepository.findAllById(generoIds));
+        }
+
         filmeService.save(filme);
+        ra.addFlashAttribute("success", "Filme cadastrado com sucesso!");
         return "redirect:/filmes";
     }
 
-    // Formulário de edição de filme
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
-        Usuario usuario = getAuthenticatedUser();
-        model.addAttribute("user", usuario);
+        model.addAttribute("user", getAuthenticatedUser());
         Filme filme = filmeService.findById(id).orElse(null);
-        if (filme == null) {
-            model.addAttribute("error", "Filme não encontrado para edição!");
-            return "redirect:/filmes";
-        }
+        if (filme == null) return "redirect:/filmes";
         model.addAttribute("filme", filme);
+        model.addAttribute("generos", generoRepository.findAll());
         return "filmes/form";
     }
 
-    // Atualizar filme existente
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/editar/{id}")
-    public String atualizarFilme(@PathVariable Long id, @ModelAttribute Filme filmeAtualizado, @RequestParam("file") MultipartFile file, @RequestParam("preco") String precoStr) throws IOException {
-        Filme filmeExistente = filmeService.findById(id).orElse(null);
-        if (filmeExistente == null) return "redirect:/filmes";
+    public String atualizarFilme(
+            @PathVariable Long id,
+            @ModelAttribute Filme filmeAtualizado,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("preco") String precoStr,
+            @RequestParam(value = "generoIds", required = false) List<Long> generoIds,
+            RedirectAttributes ra) throws IOException {
 
-        BigDecimal preco = convertToBigDecimal(precoStr);
-        filmeExistente.setPreco(preco);
-        filmeExistente.setTitulo(filmeAtualizado.getTitulo());
-        filmeExistente.setDescricao(filmeAtualizado.getDescricao());
-        filmeExistente.setHorario(filmeAtualizado.getHorario());
-        filmeExistente.setDuracao(filmeAtualizado.getDuracao());
-        filmeExistente.setClassificacao(filmeAtualizado.getClassificacao());
+        Filme existente = filmeService.findById(id).orElse(null);
+        if (existente == null) return "redirect:/filmes";
+
+        existente.setTitulo(filmeAtualizado.getTitulo());
+        existente.setDescricao(filmeAtualizado.getDescricao());
+        existente.setAno(filmeAtualizado.getAno());
+        existente.setDuracao(filmeAtualizado.getDuracao());
+        existente.setClassificacao(filmeAtualizado.getClassificacao());
+        existente.setPreco(parseBigDecimal(precoStr));
 
         if (!file.isEmpty()) {
             String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path caminho = Paths.get("src", "main", "resources", "static", "uploads", nomeArquivo);
+            Path caminho = Paths.get(uploadDir + nomeArquivo);
             Files.createDirectories(caminho.getParent());
             file.transferTo(caminho);
-            filmeExistente.setImagem(nomeArquivo);
+            existente.setImagem(nomeArquivo);
         }
 
-        filmeService.save(filmeExistente);
-        return "redirect:/filmes";
+        if (generoIds != null) {
+            existente.setGeneros(generoRepository.findAllById(generoIds));
+        } else {
+            existente.setGeneros(List.of());
+        }
+
+        filmeService.save(existente);
+        ra.addFlashAttribute("success", "Filme atualizado com sucesso!");
+        return "redirect:/filmes/" + id;
     }
 
-    // Deletar filme
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deletar")
-    public String deletarFilme(@PathVariable Long id) {
+    public String deletarFilme(@PathVariable Long id, RedirectAttributes ra) {
         filmeService.deleteById(id);
+        ra.addFlashAttribute("success", "Filme removido.");
         return "redirect:/filmes";
     }
 
-    // Detalhes do filme
     @GetMapping("/{id}")
     public String detalhesFilme(@PathVariable Long id, Model model) {
-        Usuario usuario = getAuthenticatedUser();
-        model.addAttribute("user", usuario);
         Filme filme = filmeService.findById(id).orElse(null);
-        if (filme == null) {
-            model.addAttribute("error", "Filme não encontrado!");
-            return "redirect:/filmes";
-        }
+        if (filme == null) return "redirect:/filmes";
+        model.addAttribute("user", getAuthenticatedUser());
         model.addAttribute("filme", filme);
         return "filmes/detalhes";
     }
 
-    // Método auxiliar para converter para BigDecimal
-    private BigDecimal convertToBigDecimal(String value) {
+    private BigDecimal parseBigDecimal(String value) {
         try {
             return new BigDecimal(value.replace(",", "."));
         } catch (NumberFormatException e) {

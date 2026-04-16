@@ -1,56 +1,100 @@
 # 🎬 CinemaApp
 
-Um sistema web de gerenciamento de cinema com autenticação de usuários, cadastro e visualização de filmes, e reservas de ingressos. Desenvolvido com **Spring Boot**, **Thymeleaf**, **MySQL** e **Spring Security**.
+Sistema web completo de gerenciamento de cinema com autenticação de usuários, catálogo de filmes, sessões e reserva de ingressos com seleção de assentos.
+
+🚀 **[Demo ao vivo](https://cinema-app-production-b591.up.railway.app)**
 
 ---
 
-⚠️ **Atenção:** A funcionalidade de "Esqueceu a senha" ainda não está funcionando corretamente. Estamos trabalhando para corrigir o problema. 
+## 📸 Funcionalidades
 
----
+- **Catálogo de filmes** com pôsteres, descrição, classificação etária e duração
+- **Sessões** por sala com data/hora e capacidade
+- **Reserva de ingressos** com seleção visual de assentos
+- **Painel do usuário** com histórico e cancelamento de reservas
+- **Painel administrativo** para gerenciar filmes, sessões e reservas
+- **Autenticação completa** com cadastro, login, logout e recuperação de senha
+- **Upload de imagens** de filmes com armazenamento local
+- Layout **responsivo** com Bootstrap 5
 
-## ✅ Funcionalidades já implementadas
+## 🔒 Perfis de acesso
 
-- Cadastro e login de usuários com senha criptografada (BCrypt)
-- Proteção de rotas com Spring Security
-- Listagem de filmes disponíveis com capas ilustrativas
-- Visualização de detalhes de filmes com layout aprimorado
-- Cadastro de novos filmes (apenas ADMIN)
-- Edição e deleção de filmes (apenas ADMIN)
-- Deleção de filmes cadastrados (apenas ADMIN)
-- Upload de imagens dos filmes com armazenamento local
-- Definição e cálculo do valor do ingresso por filme
-- Exibição do valor total da reserva de acordo com a quantidade de ingressos
-- Formulário de reserva com seleção de quantidade
-- Listagem de reservas por usuário
-- Cancelamento de reservas (status atualizado no banco de dados)
-- Integração com CSRF para segurança de formulários
-- Layout responsivo com Bootstrap
-- Função de mostrar/ocultar senha no formulário de registro
-- Navbar com avatar do usuário:
-  - Menu suspenso com opções de "Perfil", "Configurações" e "Logout"
-- Página de perfil do usuário para visualização e edição de dados
-- Página de configurações com opções de alteração de senha e informações pessoais
+| Perfil | Permissões |
+|--------|-----------|
+| `ADMIN` | Criar, editar e remover filmes e sessões. Ver todas as reservas. |
+| `USER`  | Visualizar filmes, reservar ingressos, cancelar e ver histórico. |
 
-## 🔧 Funcionalidades em desenvolvimento
+**Contas de teste:**
+- Admin: `admin@cinema.com` / `Admin123`
+- Usuário: `cliente@cinema.com` / `Cliente123`
 
-- [ ] Correção da funcionalidade "Esqueceu a senha"
-- [ ] Buscar filme por filtros como título, horário ou classificação
-- [ ] Painel de administração mais robusto
-- [ ] Página de perfil do usuário com histórico de reservas
-- [ ] Validações avançadas nos formulários
-- [ ] Melhorias na visualização das reservas para o usuário
+## 🛠️ Tecnologias
 
-## 🔒 Regras de acesso
+- **Java 21** + **Spring Boot 3.4**
+- **Spring Security** — autenticação e autorização por roles
+- **Spring Session JDBC** — sessões persistidas no banco
+- **Thymeleaf** — templates server-side
+- **PostgreSQL** (Neon) — banco de dados em cloud
+- **JPA / Hibernate** — ORM
+- **Bootstrap 5** — UI responsiva
+- **Maven** — gerenciamento de dependências
 
-- `ADMIN`: Pode adicionar, editar e deletar filmes
-- `USER`: Pode apenas visualizar e reservar
+## 🚀 Rodando localmente
 
-## 💡 Tecnologias utilizadas
+### Pré-requisitos
+- Java 21+
+- Maven 3.9+
+- PostgreSQL (ou conta no [Neon](https://neon.tech))
 
-- Java 17
-- Spring Boot 3
-- Spring Security
-- Thymeleaf
-- MySQL
-- JPA / Hibernate
-- Bootstrap 5
+### Passos
+
+```bash
+# Clone o repositório
+git clone https://github.com/Ferrari6138/CinemaApp.git
+cd CinemaApp/Backend
+
+# Configure o banco em src/main/resources/application.properties
+# Edite as propriedades spring.datasource.*
+
+# Execute
+./mvnw spring-boot:run
+```
+
+Acesse: `http://localhost:8080`
+
+> Na primeira execução, o sistema cria automaticamente os usuários, gêneros, filmes e sessões de teste.
+
+## 📁 Estrutura do projeto
+
+```
+Backend/
+├── src/main/java/com/cinemaapp/
+│   ├── config/          # SecurityConfig, DataInitializer
+│   ├── controllers/     # FilmeController, ReservaController, ...
+│   ├── models/          # Filme, Sessao, Reserva, Usuario, ...
+│   ├── repository/      # Interfaces JPA
+│   ├── service/         # Regras de negócio
+│   └── security/        # CustomUserDetailsService
+└── src/main/resources/
+    ├── templates/       # Views Thymeleaf
+    └── static/          # CSS, JS, uploads
+```
+
+## ☁️ Deploy
+
+O projeto está hospedado no **Railway** com banco de dados **Neon PostgreSQL**.
+
+Para fazer novo deploy:
+```bash
+cd Backend
+railway up --service cinema-app
+```
+
+## 🔧 Variáveis de ambiente (produção)
+
+| Variável | Descrição |
+|----------|-----------|
+| `PORT` | Porta do servidor (padrão: 8080) |
+| `COOKIE_SECURE` | `true` em produção HTTPS |
+| `MAIL_USER` | E-mail para envio de recuperação de senha |
+| `MAIL_PASSWORD` | Senha do e-mail |

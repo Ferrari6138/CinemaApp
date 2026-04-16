@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin | CinemaApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/cinema.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container py-4">
+
+    <div class="page-header mb-4">
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-speedometer2 text-accent me-2"></i>Dashboard Administrativo
+        </h4>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon">🎬</div>
+                <div class="stat-value" th:text="${totalFilmes}">0</div>
+                <div class="stat-label">Filmes cadastrados</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon">🎟️</div>
+                <div class="stat-value" th:text="${totalReservas}">0</div>
+                <div class="stat-label">Reservas confirmadas</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value"
+                     th:text="'R$ ' + ${receita != null ? #numbers.formatDecimal(receita, 1, 'POINT', 2, 'COMMA') : '0,00'}">
+                    R$ 0,00
+                </div>
+                <div class="stat-label">Receita total</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-value" th:text="${totalUsuarios}">0</div>
+                <div class="stat-label">Usuários cadastrados</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="section-title"><i class="bi bi-lightning text-accent"></i>Ações Rápidas</div>
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a th:href="@{/filmes/novo}" class="btn btn-cinema btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>Novo Filme
+        </a>
+        <a th:href="@{/filmes}" class="btn btn-ghost btn-sm">
+            <i class="bi bi-collection-play me-1"></i>Gerenciar Filmes
+        </a>
+    </div>
+
+    <!-- Recent reservations -->
+    <div class="section-title"><i class="bi bi-clock-history text-accent"></i>Reservas Recentes</div>
+
+    <div th:if="${!reservasRecentes.empty}" class="cinema-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Usuário</th>
+                    <th>Filme</th>
+                    <th>Sessão</th>
+                    <th>Assentos</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="r : ${reservasRecentes}">
+                    <td class="text-dim" th:text="${r.id}">1</td>
+                    <td>
+                        <div class="fw-semibold" th:text="${r.usuario.nome}">Nome</div>
+                        <div class="text-dim" style="font-size:0.75rem" th:text="${r.usuario.email}">email</div>
+                    </td>
+                    <td th:text="${r.sessao.filme.titulo}">Filme</td>
+                    <td>
+                        <div th:text="${#temporals.format(r.sessao.dataHora, 'dd/MM HH:mm')}">Data</div>
+                        <div class="text-dim" style="font-size:0.75rem" th:text="${r.sessao.sala}">Sala</div>
+                    </td>
+                    <td th:text="${r.assentos != null ? r.assentos : '-'}">A1,A2</td>
+                    <td>
+                        <span style="color:#f5c518; font-weight:600"
+                              th:text="'R$ ' + ${r.getValorTotalFormatado()}">R$ 50,00</span>
+                    </td>
+                    <td>
+                        <span th:switch="${r.status}">
+                            <span th:case="'CONFIRMADA'" class="badge-confirmada">Confirmada</span>
+                            <span th:case="'CANCELADA'" class="badge-cancelada">Cancelada</span>
+                            <span th:case="'FINALIZADA'" class="badge-finalizada">Finalizada</span>
+                        </span>
+                    </td>
+                    <td class="text-dim" style="font-size:0.8rem"
+                        th:text="${#temporals.format(r.dataReserva, 'dd/MM/yyyy HH:mm')}">Data</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${reservasRecentes.empty}" class="text-center py-4 text-dim">
+        <i class="bi bi-inbox" style="font-size:2rem; opacity:0.3"></i>
+        <p class="mt-2">Nenhuma reserva ainda.</p>
+    </div>
+</div>
+
+<footer class="cinema-footer">
+    <div class="container">&copy; 2025 CinemaApp. Todos os direitos reservados.</div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

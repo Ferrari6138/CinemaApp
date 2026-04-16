@@ -1,9 +1,8 @@
 package com.cinemaapp.models;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
-import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,109 +19,64 @@ public class Filme {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(nullable = false)
-    private LocalTime horario;
-
+    private Integer ano;
     private Integer duracao; // em minutos
     private String classificacao;
-
     private String imagem;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal preco;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "filmes_generos",
+        joinColumns = @JoinColumn(name = "filme_id"),
+        inverseJoinColumns = @JoinColumn(name = "genero_id")
+    )
+    private List<Genero> generos = new ArrayList<>();
+
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Reserva> reservas;
+    private List<Sessao> sessoes = new ArrayList<>();
 
-    // Getters e Setters BÁSICOS (que estavam faltando)
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public String getTitulo() {
-        return titulo;
-    }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    public Integer getAno() { return ano; }
+    public void setAno(Integer ano) { this.ano = ano; }
 
-    public String getDescricao() {
-        return descricao;
-    }
+    public Integer getDuracao() { return duracao; }
+    public void setDuracao(Integer duracao) { this.duracao = duracao; }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public LocalTime getHorario() {
-        return horario;
-    }
-
-    public void setHorario(LocalTime horario) {
-        this.horario = horario;
-    }
-
-    // Getters e Setters ADICIONAIS (que você já tinha)
-    public Integer getDuracao() {
-        return duracao;
-    }
-
-    public void setDuracao(Integer duracao) {
-        this.duracao = duracao;
-    }
-
-    public String getClassificacao() {
-        return classificacao;
-    }
-
-    public void setClassificacao(String classificacao) {
-        this.classificacao = classificacao;
-    }
+    public String getClassificacao() { return classificacao; }
+    public void setClassificacao(String classificacao) { this.classificacao = classificacao; }
 
     public String getImagem() { return imagem; }
-
     public void setImagem(String imagem) { this.imagem = imagem; }
 
-    // Getter e Setter para o preço
-    public BigDecimal getPreco() {
-        return preco;
-    }
+    public BigDecimal getPreco() { return preco; }
+    public void setPreco(BigDecimal preco) { this.preco = preco; }
 
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
-    }
+    public List<Genero> getGeneros() { return generos; }
+    public void setGeneros(List<Genero> generos) { this.generos = generos; }
 
+    public List<Sessao> getSessoes() { return sessoes; }
+    public void setSessoes(List<Sessao> sessoes) { this.sessoes = sessoes; }
 
-
-    public List<Reserva> getReservas() {
-        return reservas;
-    }
-
-    public void setReservas(List<Reserva> reservas) {
-        this.reservas = reservas;
-    }
-
-    // Método toString() útil para logging/debug
-    @Override
-    public String toString() {
-        return "Filme{" +
-                "id=" + id +
-                ", titulo='" + titulo + '\'' +
-                ", horario=" + horario +
-                ", duracao=" + duracao +
-                ", classificacao='" + classificacao + '\'' +
-                '}';
-    }
-
-    // Método auxiliar para exibir o preço formatado
     public String getPrecoFormatado() {
         if (preco != null) {
             return String.format("%.2f", preco).replace(".", ",");
         }
         return "0,00";
+    }
+
+    public String getDuracaoFormatada() {
+        if (duracao == null) return "";
+        return (duracao / 60) + "h " + (duracao % 60) + "min";
     }
 }

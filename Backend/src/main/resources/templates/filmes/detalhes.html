@@ -1,42 +1,177 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title th:text="${filme.titulo + ' - Detalhes'}">Detalhes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${filme.titulo + ' | CinemaApp'}">Filme | CinemaApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/cinema.css}">
 </head>
 <body>
-<div class="container mt-4">
-    <h1 th:text="${filme.titulo}"></h1>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
 
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <img th:src="@{'/uploads/' + ${filme.imagem}}" alt="Capa do Filme" class="img-fluid border rounded shadow-sm">
-        </div>
-        <div class="col-md-8">
-            <div class="p-2">
-                <p><strong>Descrição:</strong> <span th:text="${filme.descricao}"></span></p>
-                <p><strong>Horário:</strong> <span th:text="${filme.horario}"></span></p>
-                <p><strong>Duração:</strong> <span th:text="${filme.duracao} + ' min'"></span></p>
-                <p><strong>Classificação:</strong> <span th:text="${filme.classificacao}"></span></p>
-                <p><strong>Preço:</strong> R$ <span th:text="${filme.precoFormatado}"></span></p>
-
-                <div class="mt-3">
-                    <a th:href="@{/reservas/nova/{id}(id=${filme.id})}" class="btn btn-primary">Reservar Ingresso</a>
+<!-- Hero -->
+<div class="film-hero"
+     th:style="${filme.imagem != null ? 'background-image: url(' + (filme.imagem.startsWith('http') ? filme.imagem : '/uploads/' + filme.imagem) + ')' : ''}">
+    <div class="film-hero-overlay"></div>
+    <div class="container film-hero-content">
+        <div class="d-flex gap-4 align-items-end flex-wrap">
+            <img th:if="${filme.imagem != null}"
+                 th:src="${filme.imagem.startsWith('http') ? filme.imagem : '/uploads/' + filme.imagem}"
+                 th:alt="${filme.titulo}"
+                 class="film-hero-poster d-none d-md-block">
+            <div class="flex-grow-1">
+                <!-- Genres -->
+                <div class="d-flex gap-2 mb-2 flex-wrap">
+                    <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
                 </div>
-
-                <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="mt-3">
-                    <a th:href="@{/filmes/editar/{id}(id=${filme.id})}" class="btn btn-warning">Editar</a>
-                    <a th:href="@{/filmes/deletar/{id}(id=${filme.id})}" class="btn btn-danger ms-2">Deletar</a>
+                <h1 class="display-6 fw-bold mb-1" th:text="${filme.titulo}">Título</h1>
+                <div class="d-flex gap-3 align-items-center mb-3 text-dim flex-wrap" style="font-size:0.9rem">
+                    <span th:if="${filme.ano != null}"><i class="bi bi-calendar3 me-1"></i><span th:text="${filme.ano}">2024</span></span>
+                    <span th:if="${filme.duracao != null}"><i class="bi bi-clock me-1"></i><span th:text="${filme.getDuracaoFormatada()}">2h</span></span>
+                    <span th:if="${filme.classificacao != null}" class="film-rating-badge" th:text="${filme.classificacao}">14+</span>
                 </div>
-
-                <div class="mt-3">
-                    <a th:href="@{/filmes}" class="btn btn-secondary">Voltar</a>
+                <p class="text-dim mb-3" style="max-width:600px; line-height:1.6"
+                   th:text="${filme.descricao}">Descrição</p>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:1.5rem; font-weight:800; color:#f5c518"
+                          th:text="'R$ ' + ${filme.getPrecoFormatado()}">R$ 25,00</span>
+                    <span class="text-dim" style="font-size:0.85rem">por ingresso</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="container py-4">
+
+    <!-- Flash messages -->
+    <div th:if="${success}" class="alert alert-cinema alert-success alert-dismissible fade show mb-3">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Sessions -->
+            <div class="section-title"><i class="bi bi-calendar-week text-accent"></i>Sessões Disponíveis</div>
+
+            <div th:if="${!filme.sessoes.empty}">
+                <div th:each="sessao : ${filme.sessoes}"
+                     th:if="${sessao.ativa and sessao.dataHora.isAfter(#temporals.createNow())}">
+                    <a th:href="@{/reservas/sessao/{id}(id=${sessao.id})}"
+                       class="session-btn d-inline-flex flex-column align-items-center m-1">
+                        <span class="time" th:text="${#temporals.format(sessao.dataHora, 'HH:mm')}">20:00</span>
+                        <span class="sala" th:text="${sessao.sala}">Sala 1</span>
+                        <span class="seats" th:text="${sessao.capacidade + ' lugares'}">100 lugares</span>
+                    </a>
+                </div>
+
+                <p th:if="${#lists.isEmpty(filme.sessoes)}" class="text-dim">
+                    Nenhuma sessão disponível no momento.
+                </p>
+            </div>
+            <p th:if="${filme.sessoes.empty}" class="text-dim">
+                Nenhuma sessão disponível no momento.
+            </p>
+
+            <!-- Admin actions -->
+            <div class="mt-4" sec:authorize="hasRole('ADMIN')">
+                <div class="section-title"><i class="bi bi-shield text-warning"></i>Painel Admin</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a th:href="@{/sessoes/nova/{id}(id=${filme.id})}" class="btn btn-sm btn-outline-warning">
+                        <i class="bi bi-plus-circle me-1"></i>Nova Sessão
+                    </a>
+                    <a th:href="@{/filmes/editar/{id}(id=${filme.id})}" class="btn btn-sm btn-ghost">
+                        <i class="bi bi-pencil me-1"></i>Editar Filme
+                    </a>
+                    <form th:action="@{/filmes/{id}/deletar(id=${filme.id})}" method="post"
+                          onsubmit="return confirm('Deletar este filme?')">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash me-1"></i>Deletar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Sessions table for admin -->
+                <div th:if="${!filme.sessoes.empty}" class="cinema-table mt-3">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Sala</th>
+                                <th>Capacidade</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${filme.sessoes}">
+                                <td th:text="${#temporals.format(s.dataHora, 'dd/MM/yyyy HH:mm')}">Data</td>
+                                <td th:text="${s.sala}">Sala</td>
+                                <td th:text="${s.capacidade}">100</td>
+                                <td>
+                                    <span th:if="${s.ativa}" class="badge-confirmada">Ativa</span>
+                                    <span th:if="${!s.ativa}" class="badge-cancelada">Inativa</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/sessoes/{id}/deletar(id=${s.id})}" method="post"
+                                          onsubmit="return confirm('Remover esta sessão?')">
+                                        <button type="submit" class="btn btn-sm btn-ghost" style="font-size:0.75rem">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cinema-card p-3">
+                <div class="fw-bold mb-3"><i class="bi bi-info-circle text-accent me-2"></i>Informações</div>
+                <table class="w-100" style="font-size:0.9rem">
+                    <tr th:if="${filme.ano != null}">
+                        <td class="text-dim pb-2">Ano</td>
+                        <td class="pb-2 text-end" th:text="${filme.ano}">2024</td>
+                    </tr>
+                    <tr th:if="${filme.duracao != null}">
+                        <td class="text-dim pb-2">Duração</td>
+                        <td class="pb-2 text-end" th:text="${filme.getDuracaoFormatada()}">2h</td>
+                    </tr>
+                    <tr th:if="${filme.classificacao != null}">
+                        <td class="text-dim pb-2">Classificação</td>
+                        <td class="pb-2 text-end" th:text="${filme.classificacao}">14+</td>
+                    </tr>
+                    <tr th:if="${!filme.generos.empty}">
+                        <td class="text-dim pb-2">Gêneros</td>
+                        <td class="pb-2 text-end">
+                            <span th:each="g, st : ${filme.generos}" th:text="${g.nome + (st.last ? '' : ', ')}"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-dim">Preço</td>
+                        <td class="text-end fw-bold" style="color:#f5c518"
+                            th:text="'R$ ' + ${filme.getPrecoFormatado()}">R$ 25,00</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a th:href="@{/filmes}" class="btn btn-ghost btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Voltar ao catálogo
+        </a>
+    </div>
+</div>
+
+<footer class="cinema-footer">
+    <div class="container">&copy; 2025 CinemaApp. Todos os direitos reservados.</div>
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

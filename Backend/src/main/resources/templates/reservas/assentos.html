@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Assentos | CinemaApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/cinema.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container py-4">
+
+    <!-- Session info -->
+    <div class="mb-4">
+        <a th:href="@{/filmes/{id}(id=${sessao.filme.id})}" class="btn btn-ghost btn-sm mb-3">
+            <i class="bi bi-arrow-left me-1"></i>Voltar
+        </a>
+        <h4 class="fw-bold" th:text="${sessao.filme.titulo}">Filme</h4>
+        <div class="d-flex gap-3 text-dim" style="font-size:0.9rem">
+            <span><i class="bi bi-calendar3 me-1"></i>
+                <span th:text="${#temporals.format(sessao.dataHora, 'dd/MM/yyyy')}">Data</span></span>
+            <span><i class="bi bi-clock me-1"></i>
+                <span th:text="${#temporals.format(sessao.dataHora, 'HH:mm')}">Hora</span></span>
+            <span><i class="bi bi-building me-1"></i><span th:text="${sessao.sala}">Sala</span></span>
+            <span><i class="bi bi-people me-1"></i><span th:text="${disponiveis + ' lugares disponíveis'}">100 disponíveis</span></span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="seat-map-container">
+                <div class="screen">TELA</div>
+
+                <!-- Seat grid: rows A-J, cols 1-10 -->
+                <div id="seat-grid">
+                    <div th:each="row : ${ {'A','B','C','D','E','F','G','H','I','J'} }" class="seat-row">
+                        <span class="seat-row-label" th:text="${row}">A</span>
+                        <div th:each="col : ${ {1,2,3,4,5} }"
+                             th:with="seatId=${row + col}"
+                             class="seat"
+                             th:classappend="${assentosOcupados.contains(row + col)} ? ' occupied' : ' available'"
+                             th:id="${'seat-' + row + col}"
+                             th:attr="data-seat=${row + col},onclick=${assentosOcupados.contains(row + col)} ? '' : 'toggleSeat(this, \'' + row + col + '\')'">
+                            <span th:text="${col}">1</span>
+                        </div>
+                        <div class="seat-gap"></div>
+                        <div th:each="col : ${ {6,7,8,9,10} }"
+                             th:with="seatId=${row + col}"
+                             class="seat"
+                             th:classappend="${assentosOcupados.contains(row + col)} ? ' occupied' : ' available'"
+                             th:id="${'seat-' + row + col}"
+                             th:attr="data-seat=${row + col},onclick=${assentosOcupados.contains(row + col)} ? '' : 'toggleSeat(this, \'' + row + col + '\')'">
+                            <span th:text="${col}">6</span>
+                        </div>
+                        <span class="seat-row-label" th:text="${row}">A</span>
+                    </div>
+                </div>
+
+                <div class="seat-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#2a4a2a"></div> Disponível
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:var(--accent)"></div> Selecionado
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:#3a1a1a"></div> Ocupado
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="booking-summary">
+                <h5 class="fw-bold mb-3"><i class="bi bi-receipt text-accent me-2"></i>Resumo</h5>
+                <div class="mb-3">
+                    <div class="text-dim" style="font-size:0.85rem">Filme</div>
+                    <div class="fw-semibold" th:text="${sessao.filme.titulo}">Filme</div>
+                </div>
+                <div class="mb-3">
+                    <div class="text-dim" style="font-size:0.85rem">Sessão</div>
+                    <div class="fw-semibold"
+                         th:text="${#temporals.format(sessao.dataHora, 'dd/MM/yyyy HH:mm') + ' | ' + sessao.sala}">Data | Sala</div>
+                </div>
+                <hr style="border-color:var(--border)">
+                <div class="mb-1 d-flex justify-content-between">
+                    <span class="text-dim">Assentos selecionados</span>
+                    <span id="selected-count" class="fw-bold">0</span>
+                </div>
+                <div class="mb-1 d-flex justify-content-between">
+                    <span class="text-dim">Preço por ingresso</span>
+                    <span class="fw-bold" th:text="'R$ ' + ${sessao.filme.getPrecoFormatado()}">R$ 25,00</span>
+                </div>
+                <hr style="border-color:var(--border)">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-dim">Total</span>
+                    <div class="total-price">R$ <span id="total-value">0,00</span></div>
+                </div>
+
+                <div class="mb-2 text-dim" style="font-size:0.8rem">
+                    Assentos: <span id="seats-display">Nenhum selecionado</span>
+                </div>
+
+                <form id="booking-form" th:action="@{/reservas/nova}" method="post">
+                    <input type="hidden" name="sessaoId" th:value="${sessao.id}">
+                    <input type="hidden" name="assentos" id="assentos-input" value="">
+                    <button type="submit" id="confirm-btn" class="btn btn-cinema w-100" disabled>
+                        <i class="bi bi-check2-circle me-2"></i>Confirmar Reserva
+                    </button>
+                </form>
+
+                <div id="no-seats-msg" class="text-dim text-center mt-2" style="font-size:0.8rem">
+                    Selecione ao menos 1 assento
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="cinema-footer">
+    <div class="container">&copy; 2025 CinemaApp. Todos os direitos reservados.</div>
+</footer>
+
+<script>
+const selectedSeats = new Set();
+const pricePerSeat = parseFloat('[[${sessao.filme.preco}]]') || 0;
+
+function toggleSeat(el, seatId) {
+    if (el.classList.contains('occupied')) return;
+    if (selectedSeats.has(seatId)) {
+        selectedSeats.delete(seatId);
+        el.classList.remove('selected');
+        el.classList.add('available');
+    } else {
+        selectedSeats.add(seatId);
+        el.classList.remove('available');
+        el.classList.add('selected');
+    }
+    updateSummary();
+}
+
+function updateSummary() {
+    const count = selectedSeats.size;
+    const total = (count * pricePerSeat).toFixed(2).replace('.', ',');
+    document.getElementById('selected-count').textContent = count;
+    document.getElementById('total-value').textContent = total;
+    document.getElementById('assentos-input').value = [...selectedSeats].join(',');
+
+    const confirmBtn = document.getElementById('confirm-btn');
+    const noMsg = document.getElementById('no-seats-msg');
+    const seatsDisplay = document.getElementById('seats-display');
+
+    confirmBtn.disabled = count === 0;
+    noMsg.style.display = count === 0 ? 'block' : 'none';
+    seatsDisplay.textContent = count === 0 ? 'Nenhum selecionado' : [...selectedSeats].sort().join(', ');
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

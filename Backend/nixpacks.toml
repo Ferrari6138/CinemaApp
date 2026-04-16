@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["jdk21_headless", "maven"]
+
+[phases.build]
+cmds = ["mvn package -DskipTests -q && echo 'Build OK' && ls target/*.jar"]
+
+[start]
+cmd = "sh start.sh"

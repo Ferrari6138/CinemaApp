@@ -79,4 +79,8 @@ public class UsuarioService {
     public boolean existsById(Long id) {
         return usuarioRepository.existsById(id);
     }
+
+    public long count() {
+        return usuarioRepository.count();
+    }
 }
