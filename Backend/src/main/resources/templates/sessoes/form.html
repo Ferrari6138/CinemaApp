@@ -23,6 +23,14 @@
                     <form th:action="@{/sessoes/nova/{id}(id=${filme.id})}" method="post">
 
                         <div class="mb-3">
+                            <label class="form-label">Cinema *</label>
+                            <select name="cinemaId" class="form-select" required>
+                                <option value="">Selecione um cinema</option>
+                                <option th:each="c : ${cinemas}" th:value="${c.id}" th:text="${c.nome}"></option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Data e Hora *</label>
                             <input type="datetime-local" name="dataHora" class="form-control"
                                    required min="1">

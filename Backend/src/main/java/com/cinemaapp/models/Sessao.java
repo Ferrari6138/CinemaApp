@@ -16,6 +16,12 @@ public class Sessao {
     @JoinColumn(name = "filme_id", nullable = false)
     private Filme filme;
 
+    // Sem "nullable = false": coluna nova numa tabela que já tem sessões sem cinema
+    // definido. Sessões antigas ficam com cinema null até o backfill do DataInitializer.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cinema_id")
+    private Cinema cinema;
+
     @Column(nullable = false)
     private LocalDateTime dataHora;
 
@@ -38,6 +44,9 @@ public class Sessao {
 
     public Filme getFilme() { return filme; }
     public void setFilme(Filme filme) { this.filme = filme; }
+
+    public Cinema getCinema() { return cinema; }
+    public void setCinema(Cinema cinema) { this.cinema = cinema; }
 
     public LocalDateTime getDataHora() { return dataHora; }
     public void setDataHora(LocalDateTime dataHora) { this.dataHora = dataHora; }

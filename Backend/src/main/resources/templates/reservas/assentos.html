@@ -19,7 +19,9 @@
             <i class="bi bi-arrow-left me-1"></i>Voltar
         </a>
         <h4 class="fw-bold" th:text="${sessao.filme.titulo}">Filme</h4>
-        <div class="d-flex gap-3 text-dim" style="font-size:0.9rem">
+        <div class="d-flex gap-3 text-dim flex-wrap" style="font-size:0.9rem">
+            <span th:if="${sessao.cinema != null}"><i class="bi bi-geo-alt me-1"></i>
+                <span th:text="${sessao.cinema.nome}">Cinema</span></span>
             <span><i class="bi bi-calendar3 me-1"></i>
                 <span th:text="${#temporals.format(sessao.dataHora, 'dd/MM/yyyy')}">Data</span></span>
             <span><i class="bi bi-clock me-1"></i>

@@ -75,6 +75,18 @@
                             </div>
 
                             <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-2" style="cursor:pointer">
+                                    <input type="checkbox" name="emCartaz" value="true"
+                                           th:checked="${filme.id == null or filme.isEmCartaz()}">
+                                    Em cartaz (visível no catálogo)
+                                </label>
+                                <div th:if="${filme.tmdbId != null}" class="text-dim mt-1" style="font-size:0.8rem">
+                                    <i class="bi bi-robot me-1"></i>Filme importado automaticamente do TMDB — o gestor
+                                    automático pode reativar isto sozinho se o filme voltar a estar em cartaz.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
                                 <label class="form-label">Capa do Filme</label>
                                 <div th:if="${filme.imagem != null}" class="mb-2">
                                     <img th:src="@{/uploads/{img}(img=${filme.imagem})}"

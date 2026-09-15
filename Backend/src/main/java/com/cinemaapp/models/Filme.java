@@ -28,6 +28,13 @@ public class Filme {
     @Column(unique = true)
     private Long tmdbId;
 
+    // Controla se o filme aparece no catálogo público; o gestor automático só altera
+    // isto para filmes que ele mesmo importou (tmdbId != null). Fica sem "nullable = false"
+    // de proposito: e uma coluna nova numa tabela que ja tem linhas, e Hibernate ddl-auto=update
+    // nao consegue adicionar NOT NULL sem DEFAULT numa tabela nao-vazia. Linhas antigas (null)
+    // sao tratadas como "em cartaz" por isEmCartaz() abaixo.
+    private Boolean emCartaz = true;
+
     @Column(precision = 10, scale = 2)
     private BigDecimal preco;
 
@@ -66,6 +73,12 @@ public class Filme {
 
     public Long getTmdbId() { return tmdbId; }
     public void setTmdbId(Long tmdbId) { this.tmdbId = tmdbId; }
+
+    public Boolean getEmCartaz() { return emCartaz; }
+    public void setEmCartaz(Boolean emCartaz) { this.emCartaz = emCartaz; }
+
+    // null (filmes cadastrados antes deste campo existir) conta como "em cartaz"
+    public boolean isEmCartaz() { return !Boolean.FALSE.equals(emCartaz); }
 
     public BigDecimal getPreco() { return preco; }
     public void setPreco(BigDecimal preco) { this.preco = preco; }

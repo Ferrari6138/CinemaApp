@@ -22,15 +22,12 @@
                  th:alt="${filme.titulo}"
                  class="film-hero-poster d-none d-md-block">
             <div class="flex-grow-1">
-                <!-- Genres -->
-                <div class="d-flex gap-2 mb-2 flex-wrap">
-                    <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
-                </div>
-                <h1 class="display-6 fw-bold mb-1" th:text="${filme.titulo}">Título</h1>
+                <h1 class="display-6 fw-bold mb-2" th:text="${filme.titulo}">Título</h1>
                 <div class="d-flex gap-3 align-items-center mb-3 text-dim flex-wrap" style="font-size:0.9rem">
                     <span th:if="${filme.ano != null}"><i class="bi bi-calendar3 me-1"></i><span th:text="${filme.ano}">2024</span></span>
                     <span th:if="${filme.duracao != null}"><i class="bi bi-clock me-1"></i><span th:text="${filme.getDuracaoFormatada()}">2h</span></span>
                     <span th:if="${filme.classificacao != null}" class="film-rating-badge" th:text="${filme.classificacao}">14+</span>
+                    <span th:each="g : ${filme.generos}" class="badge-genero-solid" th:text="${g.nome}"></span>
                 </div>
                 <p class="text-dim mb-3" style="max-width:600px; line-height:1.6"
                    th:text="${filme.descricao}">Descrição</p>
@@ -57,22 +54,30 @@
             <!-- Sessions -->
             <div class="section-title"><i class="bi bi-calendar-week text-accent"></i>Sessões Disponíveis</div>
 
-            <div th:if="${!filme.sessoes.empty}">
-                <div th:each="sessao : ${filme.sessoes}"
-                     th:if="${sessao.ativa and sessao.dataHora.isAfter(#temporals.createNow())}">
-                    <a th:href="@{/reservas/sessao/{id}(id=${sessao.id})}"
-                       class="session-btn d-inline-flex flex-column align-items-center m-1">
-                        <span class="time" th:text="${#temporals.format(sessao.dataHora, 'HH:mm')}">20:00</span>
-                        <span class="sala" th:text="${sessao.sala}">Sala 1</span>
-                        <span class="seats" th:text="${sessao.capacidade + ' lugares'}">100 lugares</span>
-                    </a>
+            <div th:if="${!sessoesPorCinema.empty}" class="row g-3">
+                <div class="col-md-6" th:each="entry : ${sessoesPorCinema}">
+                    <div class="cinema-card p-3 h-100">
+                        <div class="fw-bold mb-2" style="font-size:0.9rem">
+                            <i class="bi bi-geo-alt text-accent me-1"></i>
+                            <span th:text="${entry.key.nome}">Cinema</span>
+                        </div>
+                        <div class="d-flex flex-wrap" th:if="${!entry.value.empty}">
+                            <a th:each="sessao : ${entry.value}"
+                               th:href="@{/reservas/sessao/{id}(id=${sessao.id})}"
+                               class="session-btn d-inline-flex flex-column align-items-center m-1">
+                                <span class="sala" th:text="${#temporals.format(sessao.dataHora, 'dd/MM')}">15/09</span>
+                                <span class="time" th:text="${#temporals.format(sessao.dataHora, 'HH:mm')}">20:00</span>
+                                <span class="sala" th:text="${sessao.sala}">Sala 1</span>
+                                <span class="seats" th:text="${sessao.capacidade + ' lugares'}">100 lugares</span>
+                            </a>
+                        </div>
+                        <p class="text-dim mb-0" style="font-size:0.85rem" th:if="${entry.value.empty}">
+                            Nenhuma sessão nesta unidade no momento.
+                        </p>
+                    </div>
                 </div>
-
-                <p th:if="${#lists.isEmpty(filme.sessoes)}" class="text-dim">
-                    Nenhuma sessão disponível no momento.
-                </p>
             </div>
-            <p th:if="${filme.sessoes.empty}" class="text-dim">
+            <p th:if="${sessoesPorCinema.empty}" class="text-dim">
                 Nenhuma sessão disponível no momento.
             </p>
 
@@ -100,6 +105,7 @@
                         <thead>
                             <tr>
                                 <th>Data/Hora</th>
+                                <th>Cinema</th>
                                 <th>Sala</th>
                                 <th>Capacidade</th>
                                 <th>Status</th>
@@ -109,6 +115,7 @@
                         <tbody>
                             <tr th:each="s : ${filme.sessoes}">
                                 <td th:text="${#temporals.format(s.dataHora, 'dd/MM/yyyy HH:mm')}">Data</td>
+                                <td th:text="${s.cinema != null ? s.cinema.nome : '-'}">Cinema</td>
                                 <td th:text="${s.sala}">Sala</td>
                                 <td th:text="${s.capacidade}">100</td>
                                 <td>

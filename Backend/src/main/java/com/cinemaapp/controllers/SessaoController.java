@@ -1,6 +1,7 @@
 package com.cinemaapp.controllers;
 
 import com.cinemaapp.models.Sessao;
+import com.cinemaapp.repository.CinemaRepository;
 import com.cinemaapp.service.FilmeService;
 import com.cinemaapp.service.SessaoService;
 import com.cinemaapp.service.UsuarioService;
@@ -21,11 +22,14 @@ public class SessaoController {
     private final SessaoService sessaoService;
     private final FilmeService filmeService;
     private final UsuarioService usuarioService;
+    private final CinemaRepository cinemaRepository;
 
-    public SessaoController(SessaoService sessaoService, FilmeService filmeService, UsuarioService usuarioService) {
+    public SessaoController(SessaoService sessaoService, FilmeService filmeService,
+                             UsuarioService usuarioService, CinemaRepository cinemaRepository) {
         this.sessaoService = sessaoService;
         this.filmeService = filmeService;
         this.usuarioService = usuarioService;
+        this.cinemaRepository = cinemaRepository;
     }
 
     private com.cinemaapp.models.Usuario getUser() {
@@ -39,6 +43,7 @@ public class SessaoController {
         model.addAttribute("user", getUser());
         model.addAttribute("filme", filmeService.findById(filmeId).orElseThrow());
         model.addAttribute("sessao", new Sessao());
+        model.addAttribute("cinemas", cinemaRepository.findAll());
         return "sessoes/form";
     }
 
@@ -46,6 +51,7 @@ public class SessaoController {
     @PostMapping("/nova/{filmeId}")
     public String salvar(
             @PathVariable Long filmeId,
+            @RequestParam Long cinemaId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dataHora,
             @RequestParam String sala,
             @RequestParam Integer capacidade,
@@ -53,6 +59,7 @@ public class SessaoController {
 
         Sessao sessao = new Sessao();
         sessao.setFilme(filmeService.findById(filmeId).orElseThrow());
+        sessao.setCinema(cinemaRepository.findById(cinemaId).orElseThrow());
         sessao.setDataHora(dataHora);
         sessao.setSala(sala);
         sessao.setCapacidade(capacidade);

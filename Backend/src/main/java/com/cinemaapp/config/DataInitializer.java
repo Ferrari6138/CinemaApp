@@ -21,8 +21,32 @@ public class DataInitializer {
                                    FilmeRepository filmeRepository,
                                    SessaoRepository sessaoRepository,
                                    ReservaRepository reservaRepository,
+                                   CinemaRepository cinemaRepository,
                                    PasswordEncoder passwordEncoder) {
         return args -> {
+            // Criar os cinemas (duas unidades da mesma rede na cidade)
+            if (cinemaRepository.count() == 0) {
+                cinemaRepository.saveAll(List.of(
+                        new Cinema("Shopping Campinas 1", "Shopping Campinas 1"),
+                        new Cinema("Shopping Campinas 2", "Shopping Campinas 2")
+                ));
+                System.out.println("Cinemas criados: Shopping Campinas 1, Shopping Campinas 2");
+            }
+
+            // Backfill: sessões criadas antes do campo cinema existir ficam sem cinema;
+            // associa todas à primeira unidade para manter a exibição consistente.
+            List<Sessao> semCinema = sessaoRepository.findByCinemaIsNull();
+            if (!semCinema.isEmpty()) {
+                Cinema cinemaPadrao = cinemaRepository.findAll().stream().findFirst().orElse(null);
+                if (cinemaPadrao != null) {
+                    for (Sessao s : semCinema) {
+                        s.setCinema(cinemaPadrao);
+                    }
+                    sessaoRepository.saveAll(semCinema);
+                    System.out.println(semCinema.size() + " sessão(ões) antiga(s) associada(s) a " + cinemaPadrao.getNome());
+                }
+            }
+
             // Criar usuários iniciais
             if (usuarioRepository.count() == 0) {
                 Usuario admin = new Usuario();
@@ -148,40 +172,42 @@ public class DataInitializer {
                 filmeRepository.saveAll(List.of(f1, f2, f3, f4, f5, f6, f7, f8));
                 System.out.println("Filmes criados: 8 filmes de teste");
 
-                // Criar sessões para cada filme
+                // Criar sessões para cada filme, distribuídas entre as duas unidades
                 LocalDateTime base = LocalDateTime.now().plusDays(1).withMinute(0).withSecond(0).withNano(0);
+                Cinema campinas1 = cinemaRepository.findByNome("Shopping Campinas 1").orElseThrow();
+                Cinema campinas2 = cinemaRepository.findByNome("Shopping Campinas 2").orElseThrow();
 
                 List<Sessao> sessoes = List.of(
-                    sessao(f1, base.withHour(14), "Sala 1", 120),
-                    sessao(f1, base.withHour(18), "Sala 1", 120),
-                    sessao(f1, base.plusDays(1).withHour(20), "Sala 2", 100),
+                    sessao(f1, campinas1, base.withHour(14), "Sala 1", 100),
+                    sessao(f1, campinas2, base.withHour(18), "Sala 1", 100),
+                    sessao(f1, campinas1, base.plusDays(1).withHour(20), "Sala 2", 100),
 
-                    sessao(f2, base.withHour(15), "Sala 2", 100),
-                    sessao(f2, base.withHour(19), "Sala 3", 80),
-                    sessao(f2, base.plusDays(2).withHour(17), "Sala 1", 120),
+                    sessao(f2, campinas2, base.withHour(15), "Sala 2", 100),
+                    sessao(f2, campinas1, base.withHour(19), "Sala 3", 80),
+                    sessao(f2, campinas2, base.plusDays(2).withHour(17), "Sala 1", 100),
 
-                    sessao(f3, base.withHour(13), "Sala 3", 80),
-                    sessao(f3, base.withHour(16), "Sala 2", 100),
-                    sessao(f3, base.plusDays(1).withHour(21), "Sala 1", 120),
+                    sessao(f3, campinas1, base.withHour(13), "Sala 3", 80),
+                    sessao(f3, campinas2, base.withHour(16), "Sala 2", 100),
+                    sessao(f3, campinas1, base.plusDays(1).withHour(21), "Sala 1", 100),
 
-                    sessao(f4, base.withHour(11), "Sala 4", 150),
-                    sessao(f4, base.withHour(15), "Sala 4", 150),
-                    sessao(f4, base.plusDays(1).withHour(13), "Sala 4", 150),
+                    sessao(f4, campinas2, base.withHour(11), "Sala 4", 100),
+                    sessao(f4, campinas1, base.withHour(15), "Sala 4", 100),
+                    sessao(f4, campinas2, base.plusDays(1).withHour(13), "Sala 4", 100),
 
-                    sessao(f5, base.withHour(20), "Sala 1", 120),
-                    sessao(f5, base.withHour(22), "Sala 3", 80),
-                    sessao(f5, base.plusDays(2).withHour(21), "Sala 2", 100),
+                    sessao(f5, campinas1, base.withHour(20), "Sala 1", 100),
+                    sessao(f5, campinas2, base.withHour(22), "Sala 3", 80),
+                    sessao(f5, campinas1, base.plusDays(2).withHour(21), "Sala 2", 100),
 
-                    sessao(f6, base.withHour(14), "Sala 2", 100),
-                    sessao(f6, base.withHour(17), "Sala 1", 120),
-                    sessao(f6, base.plusDays(1).withHour(19), "Sala 3", 80),
+                    sessao(f6, campinas2, base.withHour(14), "Sala 2", 100),
+                    sessao(f6, campinas1, base.withHour(17), "Sala 1", 100),
+                    sessao(f6, campinas2, base.plusDays(1).withHour(19), "Sala 3", 80),
 
-                    sessao(f7, base.withHour(16), "Sala 3", 80),
-                    sessao(f7, base.plusDays(1).withHour(18), "Sala 2", 100),
+                    sessao(f7, campinas1, base.withHour(16), "Sala 3", 80),
+                    sessao(f7, campinas2, base.plusDays(1).withHour(18), "Sala 2", 100),
 
-                    sessao(f8, base.withHour(18), "Sala 1", 120),
-                    sessao(f8, base.withHour(21), "Sala 2", 100),
-                    sessao(f8, base.plusDays(2).withHour(20), "Sala 3", 80)
+                    sessao(f8, campinas1, base.withHour(18), "Sala 1", 100),
+                    sessao(f8, campinas2, base.withHour(21), "Sala 2", 100),
+                    sessao(f8, campinas1, base.plusDays(2).withHour(20), "Sala 3", 80)
                 );
 
                 sessaoRepository.saveAll(sessoes);
@@ -223,9 +249,10 @@ public class DataInitializer {
         };
     }
 
-    private Sessao sessao(Filme filme, LocalDateTime dataHora, String sala, int capacidade) {
+    private Sessao sessao(Filme filme, Cinema cinema, LocalDateTime dataHora, String sala, int capacidade) {
         Sessao s = new Sessao();
         s.setFilme(filme);
+        s.setCinema(cinema);
         s.setDataHora(dataHora);
         s.setSala(sala);
         s.setCapacidade(capacidade);

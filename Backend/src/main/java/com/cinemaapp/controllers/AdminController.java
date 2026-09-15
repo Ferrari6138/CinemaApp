@@ -48,7 +48,8 @@ public class AdminController {
     public String executarGestor(RedirectAttributes ra) {
         CinemaManagerService.Resultado resultado = cinemaManagerService.executar();
         ra.addFlashAttribute("success",
-                resultado.filmesImportados() + " filme(s) importado(s) do TMDB, "
+                resultado.filmesImportados() + " filme(s) importado(s), "
+                        + resultado.filmesRemovidos() + " tirado(s) de cartaz, "
                         + resultado.sessoesCriadas() + " sessão(ões) criada(s).");
         return "redirect:/admin/dashboard";
     }

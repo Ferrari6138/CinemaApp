@@ -58,6 +58,10 @@
                 <div th:if="${filme.imagem == null}" class="no-poster">
                     <i class="bi bi-film"></i>
                 </div>
+                <span th:if="${!filme.isEmCartaz()}" sec:authorize="hasRole('ADMIN')"
+                      class="badge-cancelada" style="position:absolute; top:8px; right:8px; z-index:2">
+                    Fora de cartaz
+                </span>
                 <div class="film-card-overlay">
                     <div class="d-flex gap-1 flex-wrap">
                         <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
