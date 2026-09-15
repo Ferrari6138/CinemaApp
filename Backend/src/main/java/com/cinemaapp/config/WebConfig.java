@@ -28,8 +28,11 @@ public class WebConfig implements WebMvcConfigurer {
         } catch (IOException e) {
             throw new IllegalStateException("Não foi possível criar o diretório de uploads: " + uploadPath, e);
         }
+        // Ordem importa: primeiro tenta a pasta de uploads em disco (posteres enviados
+        // pelo admin); se não achar, cai para o classpath, onde vive o default-avatar.jpg
+        // empacotado no jar. Sem o segundo local, o avatar padrão fica quebrado.
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+                .addResourceLocations("file:" + uploadPath + "/", "classpath:/static/uploads/");
     }
 
     @Override

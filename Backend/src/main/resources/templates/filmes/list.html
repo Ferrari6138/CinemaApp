@@ -62,14 +62,12 @@
                       class="badge-cancelada" style="position:absolute; top:8px; right:8px; z-index:2">
                     Fora de cartaz
                 </span>
-                <div class="film-card-overlay">
-                    <div class="d-flex gap-1 flex-wrap">
-                        <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
-                    </div>
-                </div>
             </div>
             <div class="film-card-body">
                 <div class="film-card-title" th:text="${filme.titulo}">Título</div>
+                <div class="d-flex gap-1 flex-wrap mb-2">
+                    <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
+                </div>
                 <div class="film-card-meta">
                     <span th:if="${filme.duracao != null}" th:text="${filme.getDuracaoFormatada()}">2h</span>
                     <span th:if="${filme.classificacao != null}" class="badge-genero" th:text="${filme.classificacao}">14+</span>
