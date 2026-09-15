@@ -86,7 +86,7 @@
         <a th:href="@{/filmes}" class="text-accent">Ver todos os filmes</a>
     </div>
 
-    <nav th:if="${totalPaginas > 1}" class="d-flex justify-content-center gap-2 py-4">
+    <nav th:if="${totalPaginas > 1}" class="d-flex flex-wrap justify-content-center gap-2 py-4">
         <a th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
            th:href="@{/filmes(page=${i}, q=${q}, generoId=${generoId})}"
            class="genre-chip"
