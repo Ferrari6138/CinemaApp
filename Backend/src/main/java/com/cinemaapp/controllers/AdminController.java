@@ -44,6 +44,16 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+    @GetMapping("/reservas")
+    public String todasReservas(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("user", usuarioService.findByEmail(auth.getName()).orElse(null));
+        model.addAttribute("reservas", reservaService.findAll());
+        model.addAttribute("titulo", "Todas as Reservas");
+        model.addAttribute("mostrarUsuario", true);
+        return "reservas/list";
+    }
+
     @PostMapping("/gestor/executar")
     public String executarGestor(RedirectAttributes ra) {
         CinemaManagerService.Resultado resultado = cinemaManagerService.executar();

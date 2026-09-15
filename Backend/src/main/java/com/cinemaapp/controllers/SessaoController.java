@@ -71,6 +71,39 @@ public class SessaoController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/editar/{id}")
+    public String formEditar(@PathVariable Long id, Model model) {
+        Sessao sessao = sessaoService.findById(id).orElse(null);
+        if (sessao == null) return "redirect:/filmes";
+        model.addAttribute("user", getUser());
+        model.addAttribute("filme", sessao.getFilme());
+        model.addAttribute("sessao", sessao);
+        model.addAttribute("cinemas", cinemaRepository.findAll());
+        return "sessoes/form";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/editar/{id}")
+    public String atualizar(
+            @PathVariable Long id,
+            @RequestParam Long cinemaId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dataHora,
+            @RequestParam String sala,
+            @RequestParam Integer capacidade,
+            RedirectAttributes ra) {
+
+        Sessao sessao = sessaoService.findById(id).orElseThrow();
+        sessao.setCinema(cinemaRepository.findById(cinemaId).orElseThrow());
+        sessao.setDataHora(dataHora);
+        sessao.setSala(sala);
+        sessao.setCapacidade(capacidade);
+        sessaoService.save(sessao);
+
+        ra.addFlashAttribute("success", "Sessão atualizada com sucesso!");
+        return "redirect:/filmes/" + sessao.getFilme().getId();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deletar")
     public String deletar(@PathVariable Long id, RedirectAttributes ra) {
         Sessao sessao = sessaoService.findById(id).orElseThrow();

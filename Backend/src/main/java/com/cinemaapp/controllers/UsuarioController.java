@@ -5,6 +5,7 @@ import com.cinemaapp.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +22,14 @@ import java.nio.file.Paths;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private Usuario getAuthenticatedUser() {
@@ -75,11 +78,16 @@ public class UsuarioController {
 
     @PostMapping("/configuracoes/senha")
     public String atualizarSenha(
+            @RequestParam("senhaAtual") String senhaAtual,
             @RequestParam("novaSenha") String novaSenha,
             @RequestParam("confirmaSenha") String confirmaSenha,
             RedirectAttributes ra) {
         Usuario usuario = getAuthenticatedUser();
         if (usuario == null) return "redirect:/auth/login";
+        if (!passwordEncoder.matches(senhaAtual, usuario.getSenha())) {
+            ra.addFlashAttribute("error", "Senha atual incorreta.");
+            return "redirect:/usuarios/configuracoes";
+        }
         if (!novaSenha.equals(confirmaSenha)) {
             ra.addFlashAttribute("error", "As senhas não coincidem.");
             return "redirect:/usuarios/configuracoes";

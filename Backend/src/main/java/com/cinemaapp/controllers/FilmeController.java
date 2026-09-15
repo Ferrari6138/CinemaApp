@@ -64,6 +64,8 @@ public class FilmeController {
         binder.setDisallowedFields("preco", "emCartaz", "id", "generos", "sessoes");
     }
 
+    private static final int FILMES_POR_PAGINA = 12;
+
     private boolean isAdmin(Usuario usuario) {
         return usuario != null && "ADMIN".equals(usuario.getRole());
     }
@@ -72,6 +74,7 @@ public class FilmeController {
     public String listarFilmes(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long generoId,
+            @RequestParam(defaultValue = "0") int page,
             Model model) {
         Usuario usuario = getAuthenticatedUser();
         model.addAttribute("user", usuario);
@@ -89,10 +92,19 @@ public class FilmeController {
             filmes = filmes.stream().filter(Filme::isEmCartaz).toList();
         }
 
-        model.addAttribute("filmes", filmes);
+        int totalFilmes = filmes.size();
+        int totalPaginas = Math.max(1, (int) Math.ceil(totalFilmes / (double) FILMES_POR_PAGINA));
+        int paginaAtual = Math.max(0, Math.min(page, totalPaginas - 1));
+        int inicio = paginaAtual * FILMES_POR_PAGINA;
+        int fim = Math.min(inicio + FILMES_POR_PAGINA, totalFilmes);
+        List<Filme> filmesPagina = inicio < fim ? filmes.subList(inicio, fim) : List.of();
+
+        model.addAttribute("filmes", filmesPagina);
         model.addAttribute("generos", generoRepository.findAll());
         model.addAttribute("q", q);
         model.addAttribute("generoId", generoId);
+        model.addAttribute("paginaAtual", paginaAtual);
+        model.addAttribute("totalPaginas", totalPaginas);
         return "filmes/list";
     }
 

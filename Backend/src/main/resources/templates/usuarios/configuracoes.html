@@ -58,6 +58,11 @@
                 <div class="p-4 cinema-form">
                     <form th:action="@{/usuarios/configuracoes/senha}" method="post">
                         <div class="mb-3">
+                            <label class="form-label">Senha atual</label>
+                            <input type="password" name="senhaAtual" class="form-control"
+                                   placeholder="Digite sua senha atual" required>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Nova senha</label>
                             <input type="password" name="novaSenha" class="form-control"
                                    placeholder="Mín. 6 caracteres" required minlength="6">

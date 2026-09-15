@@ -85,6 +85,14 @@
         <h4 class="text-dim mt-3">Nenhum filme encontrado</h4>
         <a th:href="@{/filmes}" class="text-accent">Ver todos os filmes</a>
     </div>
+
+    <nav th:if="${totalPaginas > 1}" class="d-flex justify-content-center gap-2 py-4">
+        <a th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+           th:href="@{/filmes(page=${i}, q=${q}, generoId=${generoId})}"
+           class="genre-chip"
+           th:classappend="${i == paginaAtual} ? ' active' : ''"
+           th:text="${i + 1}">1</a>
+    </nav>
 </div>
 
 <footer class="cinema-footer">

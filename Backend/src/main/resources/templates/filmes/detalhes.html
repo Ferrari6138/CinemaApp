@@ -123,7 +123,10 @@
                                     <span th:if="${!s.ativa}" class="badge-cancelada">Inativa</span>
                                 </td>
                                 <td>
-                                    <form th:action="@{/sessoes/{id}/deletar(id=${s.id})}" method="post"
+                                    <a th:href="@{/sessoes/editar/{id}(id=${s.id})}" class="btn btn-sm btn-ghost" style="font-size:0.75rem">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{/sessoes/{id}/deletar(id=${s.id})}" method="post" class="d-inline"
                                           onsubmit="return confirm('Remover esta sessão?')">
                                         <button type="submit" class="btn btn-sm btn-ghost" style="font-size:0.75rem">
                                             <i class="bi bi-trash"></i>

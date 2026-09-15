@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema | CinemaApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/cinema.css}">
+</head>
+<body>
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="cinema-card">
+                <div class="card-header">
+                    <i class="bi bi-geo-alt text-accent me-2"></i>
+                    <span th:text="${cinema.id != null ? 'Editar Cinema' : 'Novo Cinema'}">Cinema</span>
+                </div>
+                <div class="p-4 cinema-form">
+                    <form th:action="${cinema.id != null ? '/admin/cinemas/editar/' + cinema.id : '/admin/cinemas/novo'}"
+                          method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Nome *</label>
+                            <input type="text" name="nome" class="form-control"
+                                   th:value="${cinema.nome}" placeholder="Ex: Shopping Campinas 1" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Endereço</label>
+                            <input type="text" name="endereco" class="form-control"
+                                   th:value="${cinema.endereco}" placeholder="Ex: Av. Central, 1000">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-cinema">
+                                <i class="bi bi-check2 me-1"></i>
+                                <span th:text="${cinema.id != null ? 'Atualizar' : 'Cadastrar'}">Salvar</span>
+                            </button>
+                            <a th:href="@{/admin/cinemas}" class="btn btn-ghost">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="cinema-footer">
+    <div class="container">&copy; 2025 CinemaApp. Todos os direitos reservados.</div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

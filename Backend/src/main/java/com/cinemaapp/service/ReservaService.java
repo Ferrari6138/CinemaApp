@@ -80,7 +80,7 @@ public class ReservaService {
     }
 
     public List<Reserva> findAll() {
-        return reservaRepository.findAll();
+        return reservaRepository.findAllByOrderByDataReservaDesc();
     }
 
     public List<Reserva> findRecentes() {

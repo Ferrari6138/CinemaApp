@@ -20,6 +20,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findAll();
 
     @EntityGraph(attributePaths = {"sessao", "sessao.filme", "usuario"})
+    List<Reserva> findAllByOrderByDataReservaDesc();
+
+    @EntityGraph(attributePaths = {"sessao", "sessao.filme", "usuario"})
     List<Reserva> findTop10ByOrderByDataReservaDesc();
 
     List<Reserva> findBySessaoIdAndStatus(Long sessaoId, String status);
