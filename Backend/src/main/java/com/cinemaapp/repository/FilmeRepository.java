@@ -17,4 +17,6 @@ public interface FilmeRepository extends JpaRepository<Filme, Long> {
 
     @Query("SELECT f FROM Filme f LEFT JOIN FETCH f.sessoes WHERE f.id = :id")
     Optional<Filme> findByIdWithSessoes(@Param("id") Long id);
+
+    boolean existsByTmdbId(Long tmdbId);
 }

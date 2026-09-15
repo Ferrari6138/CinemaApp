@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -43,6 +44,14 @@ public class FilmeController {
     private Usuario getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return usuarioService.findByEmail(auth.getName()).orElse(null);
+    }
+
+    // "preco", "id", "generos" e "sessoes" são tratados manualmente nos métodos abaixo;
+    // sem isso o binding automático tenta converter o campo "preco" (ex: "32,00") direto
+    // para BigDecimal e quebra com erro de conversão ao salvar/atualizar o filme.
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.setDisallowedFields("preco", "id", "generos", "sessoes");
     }
 
     @GetMapping
@@ -90,11 +99,7 @@ public class FilmeController {
         filme.setPreco(parseBigDecimal(precoStr));
 
         if (!file.isEmpty()) {
-            String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path caminho = Paths.get(uploadDir + nomeArquivo);
-            Files.createDirectories(caminho.getParent());
-            file.transferTo(caminho);
-            filme.setImagem(nomeArquivo);
+            filme.setImagem(salvarImagem(file));
         }
 
         if (generoIds != null) {
@@ -138,11 +143,7 @@ public class FilmeController {
         existente.setPreco(parseBigDecimal(precoStr));
 
         if (!file.isEmpty()) {
-            String nomeArquivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path caminho = Paths.get(uploadDir + nomeArquivo);
-            Files.createDirectories(caminho.getParent());
-            file.transferTo(caminho);
-            existente.setImagem(nomeArquivo);
+            existente.setImagem(salvarImagem(file));
         }
 
         if (generoIds != null) {
@@ -179,5 +180,14 @@ public class FilmeController {
         } catch (NumberFormatException e) {
             return BigDecimal.ZERO;
         }
+    }
+
+    private String salvarImagem(MultipartFile file) throws IOException {
+        String nomeOriginal = Paths.get(file.getOriginalFilename()).getFileName().toString();
+        String nomeArquivo = System.currentTimeMillis() + "_" + nomeOriginal;
+        Path destino = Paths.get(uploadDir).resolve(nomeArquivo);
+        Files.createDirectories(destino.getParent());
+        file.transferTo(destino);
+        return nomeArquivo;
     }
 }

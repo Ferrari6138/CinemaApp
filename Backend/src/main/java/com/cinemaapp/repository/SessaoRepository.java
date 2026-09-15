@@ -20,4 +20,6 @@ public interface SessaoRepository extends JpaRepository<Sessao, Long> {
 
     @Query("SELECT s FROM Sessao s WHERE s.ativa = true ORDER BY s.dataHora ASC")
     List<Sessao> findAllAtivas();
+
+    boolean existsByFilmeIdAndDataHoraAndSala(Long filmeId, LocalDateTime dataHora, String sala);
 }

@@ -39,20 +39,18 @@
                     <div th:each="row : ${ {'A','B','C','D','E','F','G','H','I','J'} }" class="seat-row">
                         <span class="seat-row-label" th:text="${row}">A</span>
                         <div th:each="col : ${ {1,2,3,4,5} }"
-                             th:with="seatId=${row + col}"
                              class="seat"
                              th:classappend="${assentosOcupados.contains(row + col)} ? ' occupied' : ' available'"
                              th:id="${'seat-' + row + col}"
-                             th:attr="data-seat=${row + col},onclick=${assentosOcupados.contains(row + col)} ? '' : 'toggleSeat(this, \'' + row + col + '\')'">
+                             th:data-seat="${row + col}">
                             <span th:text="${col}">1</span>
                         </div>
                         <div class="seat-gap"></div>
                         <div th:each="col : ${ {6,7,8,9,10} }"
-                             th:with="seatId=${row + col}"
                              class="seat"
                              th:classappend="${assentosOcupados.contains(row + col)} ? ' occupied' : ' available'"
                              th:id="${'seat-' + row + col}"
-                             th:attr="data-seat=${row + col},onclick=${assentosOcupados.contains(row + col)} ? '' : 'toggleSeat(this, \'' + row + col + '\')'">
+                             th:data-seat="${row + col}">
                             <span th:text="${col}">6</span>
                         </div>
                         <span class="seat-row-label" th:text="${row}">A</span>
@@ -127,6 +125,12 @@
 <script>
 const selectedSeats = new Set();
 const pricePerSeat = parseFloat('[[${sessao.filme.preco}]]') || 0;
+
+document.getElementById('seat-grid').addEventListener('click', function (e) {
+    const el = e.target.closest('.seat');
+    if (!el || el.classList.contains('occupied')) return;
+    toggleSeat(el, el.dataset.seat);
+});
 
 function toggleSeat(el, seatId) {
     if (el.classList.contains('occupied')) return;

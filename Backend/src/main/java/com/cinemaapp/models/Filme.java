@@ -24,6 +24,10 @@ public class Filme {
     private String classificacao;
     private String imagem;
 
+    // id do filme no TMDB, usado pelo gestor automático para evitar reimportar o mesmo filme
+    @Column(unique = true)
+    private Long tmdbId;
+
     @Column(precision = 10, scale = 2)
     private BigDecimal preco;
 
@@ -36,6 +40,7 @@ public class Filme {
     private List<Genero> generos = new ArrayList<>();
 
     @OneToMany(mappedBy = "filme", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("dataHora ASC")
     private List<Sessao> sessoes = new ArrayList<>();
 
     public Long getId() { return id; }
@@ -58,6 +63,9 @@ public class Filme {
 
     public String getImagem() { return imagem; }
     public void setImagem(String imagem) { this.imagem = imagem; }
+
+    public Long getTmdbId() { return tmdbId; }
+    public void setTmdbId(Long tmdbId) { this.tmdbId = tmdbId; }
 
     public BigDecimal getPreco() { return preco; }
     public void setPreco(BigDecimal preco) { this.preco = preco; }

@@ -1,5 +1,6 @@
 package com.cinemaapp.controllers;
 
+import com.cinemaapp.service.CinemaManagerService;
 import com.cinemaapp.service.FilmeService;
 import com.cinemaapp.service.ReservaService;
 import com.cinemaapp.service.UsuarioService;
@@ -9,7 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -19,11 +22,14 @@ public class AdminController {
     private final FilmeService filmeService;
     private final ReservaService reservaService;
     private final UsuarioService usuarioService;
+    private final CinemaManagerService cinemaManagerService;
 
-    public AdminController(FilmeService filmeService, ReservaService reservaService, UsuarioService usuarioService) {
+    public AdminController(FilmeService filmeService, ReservaService reservaService,
+                            UsuarioService usuarioService, CinemaManagerService cinemaManagerService) {
         this.filmeService = filmeService;
         this.reservaService = reservaService;
         this.usuarioService = usuarioService;
+        this.cinemaManagerService = cinemaManagerService;
     }
 
     @GetMapping("/dashboard")
@@ -36,5 +42,14 @@ public class AdminController {
         model.addAttribute("totalUsuarios", usuarioService.count());
         model.addAttribute("reservasRecentes", reservaService.findRecentes());
         return "admin/dashboard";
+    }
+
+    @PostMapping("/gestor/executar")
+    public String executarGestor(RedirectAttributes ra) {
+        CinemaManagerService.Resultado resultado = cinemaManagerService.executar();
+        ra.addFlashAttribute("success",
+                resultado.filmesImportados() + " filme(s) importado(s) do TMDB, "
+                        + resultado.sessoesCriadas() + " sessão(ões) criada(s).");
+        return "redirect:/admin/dashboard";
     }
 }
