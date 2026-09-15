@@ -15,7 +15,7 @@ public interface FilmeRepository extends JpaRepository<Filme, Long> {
     @Query("SELECT DISTINCT f FROM Filme f JOIN f.generos g WHERE g.id = :generoId")
     List<Filme> findByGeneroId(@Param("generoId") Long generoId);
 
-    @Query("SELECT f FROM Filme f LEFT JOIN FETCH f.sessoes WHERE f.id = :id")
+    @Query("SELECT f FROM Filme f LEFT JOIN FETCH f.sessoes s LEFT JOIN FETCH s.cinema WHERE f.id = :id")
     Optional<Filme> findByIdWithSessoes(@Param("id") Long id);
 
     boolean existsByTmdbId(Long tmdbId);

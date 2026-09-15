@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface SessaoRepository extends JpaRepository<Sessao, Long> {
 
-    @Query("SELECT s FROM Sessao s JOIN FETCH s.filme WHERE s.id = :id")
+    @Query("SELECT s FROM Sessao s JOIN FETCH s.filme LEFT JOIN FETCH s.cinema WHERE s.id = :id")
     Optional<Sessao> findByIdWithFilme(@Param("id") Long id);
 
     List<Sessao> findByFilmeIdAndAtivaTrue(Long filmeId);
