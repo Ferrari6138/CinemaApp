@@ -1,3 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "java -Dserver.port=${PORT:-8080} -jar app.jar"
+healthcheckPath = "/auth/login"
