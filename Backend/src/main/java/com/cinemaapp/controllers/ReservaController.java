@@ -1,10 +1,12 @@
 package com.cinemaapp.controllers;
 
+import com.cinemaapp.models.Reserva;
 import com.cinemaapp.models.Sessao;
 import com.cinemaapp.models.Usuario;
 import com.cinemaapp.service.ReservaService;
 import com.cinemaapp.service.SessaoService;
 import com.cinemaapp.service.UsuarioService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -65,6 +67,7 @@ public class ReservaController {
         return "reservas/list";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/usuario/{usuarioId}")
     public String reservasPorUsuario(@PathVariable Long usuarioId,
                                      @AuthenticationPrincipal UserDetails userDetails,
@@ -75,7 +78,21 @@ public class ReservaController {
     }
 
     @PostMapping("/{id}/cancelar")
-    public String cancelarReserva(@PathVariable Long id, RedirectAttributes ra) {
+    public String cancelarReserva(@PathVariable Long id,
+                                  @AuthenticationPrincipal UserDetails userDetails,
+                                  RedirectAttributes ra) {
+        Usuario usuario = getUser(userDetails.getUsername());
+        Reserva reserva = reservaService.findById(id).orElse(null);
+
+        boolean isAdmin = usuario != null && "ADMIN".equals(usuario.getRole());
+        boolean isOwner = reserva != null && usuario != null
+                && reserva.getUsuario().getId().equals(usuario.getId());
+
+        if (reserva == null || (!isAdmin && !isOwner)) {
+            ra.addFlashAttribute("error", "Reserva não encontrada.");
+            return "redirect:/reservas/minhas";
+        }
+
         reservaService.cancelarReserva(id);
         ra.addFlashAttribute("success", "Reserva cancelada.");
         return "redirect:/reservas/minhas";
