@@ -20,3 +20,4 @@ jobs:
         working-directory: ./Backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          
