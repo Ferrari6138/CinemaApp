@@ -3,7 +3,7 @@ name: Deploy to Railway
 on:
   push:
     branches:
-      - main # Altere para master caso sua branch principal no GitHub se chame master
+      - main # Mude para master se a sua branch for master
 
 jobs:
   deploy:
@@ -17,5 +17,6 @@ jobs:
 
       - name: Deploy to Railway
         run: railway up --service cinema-app
+        working-directory: ./Backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
