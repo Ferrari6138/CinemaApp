@@ -84,6 +84,10 @@ public class UsuarioController {
             ra.addFlashAttribute("error", "As senhas não coincidem.");
             return "redirect:/usuarios/configuracoes";
         }
+        if (!novaSenha.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,}$")) {
+            ra.addFlashAttribute("error", "A senha deve conter letras maiúsculas, minúsculas e números.");
+            return "redirect:/usuarios/configuracoes";
+        }
         usuarioService.atualizarSenha(usuario, novaSenha);
         ra.addFlashAttribute("success", "Senha atualizada com sucesso!");
         return "redirect:/usuarios/perfil";
