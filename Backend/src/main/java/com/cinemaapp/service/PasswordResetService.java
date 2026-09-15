@@ -6,6 +6,7 @@ import com.cinemaapp.models.Usuario;
 import com.cinemaapp.repository.PasswordResetTokenRepository;
 import com.cinemaapp.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,9 @@ public class PasswordResetService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     public void sendResetLink(Usuario usuario) {
         // Gera um token único
         String token = UUID.randomUUID().toString();
@@ -46,7 +50,7 @@ public class PasswordResetService {
         tokenRepository.save(resetToken);
 
         // Envia o e-mail de recuperação
-        String link = "http://localhost:8080/auth/reset-password?token=" + token;
+        String link = baseUrl + "/auth/reset-password?token=" + token;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(usuario.getEmail());
         message.setSubject("Recuperação de Senha - CinemaApp");

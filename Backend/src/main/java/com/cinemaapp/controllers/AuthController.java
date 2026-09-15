@@ -158,6 +158,12 @@ public class AuthController {
     public String processResetPassword(@RequestParam("token") String token,
                                        @RequestParam("newPassword") String newPassword,
                                        RedirectAttributes redirectAttributes) {
+        if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,}$")) {
+            redirectAttributes.addFlashAttribute("error",
+                    "A senha deve conter letras maiúsculas, minúsculas e números, com no mínimo 6 caracteres.");
+            redirectAttributes.addAttribute("token", token);
+            return "redirect:/auth/reset-password";
+        }
         if (passwordResetService.updatePassword(token, newPassword)) {
             redirectAttributes.addFlashAttribute("message", "Senha atualizada com sucesso!");
             return "redirect:/auth/login";

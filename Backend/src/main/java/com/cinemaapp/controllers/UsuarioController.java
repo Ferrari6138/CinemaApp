@@ -59,8 +59,9 @@ public class UsuarioController {
             return "redirect:/usuarios/configuracoes";
         }
         try {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + fileName);
+            String nomeOriginal = Paths.get(file.getOriginalFilename()).getFileName().toString();
+            String fileName = System.currentTimeMillis() + "_" + nomeOriginal;
+            Path filePath = Paths.get(uploadDir).resolve(fileName);
             Files.createDirectories(filePath.getParent());
             file.transferTo(filePath);
             usuario.setAvatar(fileName);
