@@ -89,7 +89,7 @@
                             <div class="col-12">
                                 <label class="form-label">Capa do Filme</label>
                                 <div th:if="${filme.imagem != null}" class="mb-2">
-                                    <img th:src="@{/uploads/{img}(img=${filme.imagem})}"
+                                    <img th:src="${filme.imagem.startsWith('http') ? filme.imagem : '/uploads/' + filme.imagem}"
                                          style="height:80px; border-radius:8px; object-fit:cover">
                                     <span class="text-dim ms-2" style="font-size:0.8rem">Imagem atual</span>
                                 </div>
