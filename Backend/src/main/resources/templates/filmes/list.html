@@ -47,37 +47,45 @@
         — <a th:href="@{/filmes}" class="text-accent" style="text-decoration:none">Limpar</a>
     </p>
 
-    <div class="film-grid" th:if="${!filmes.empty}">
-        <a th:each="filme : ${filmes}"
-           th:href="@{/filmes/{id}(id=${filme.id})}"
-           class="film-card">
-            <div class="film-card-poster">
-                <img th:if="${filme.imagem != null}"
-                     th:src="${filme.imagem.startsWith('http') ? filme.imagem : '/uploads/' + filme.imagem}"
-                     th:alt="${filme.titulo}" loading="lazy">
-                <div th:if="${filme.imagem == null}" class="no-poster">
-                    <i class="bi bi-film"></i>
+    <div class="film-carousel" th:if="${!filmes.empty}">
+        <button type="button" class="carousel-arrow carousel-arrow-left" aria-label="Anterior">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="film-carousel-track">
+            <a th:each="filme : ${filmes}"
+               th:href="@{/filmes/{id}(id=${filme.id})}"
+               class="film-card">
+                <div class="film-card-poster">
+                    <img th:if="${filme.imagem != null}"
+                         th:src="${filme.imagem.startsWith('http') ? filme.imagem : '/uploads/' + filme.imagem}"
+                         th:alt="${filme.titulo}" loading="lazy">
+                    <div th:if="${filme.imagem == null}" class="no-poster">
+                        <i class="bi bi-film"></i>
+                    </div>
+                    <span th:if="${!filme.isEmCartaz()}" sec:authorize="hasRole('ADMIN')"
+                          class="badge-cancelada" style="position:absolute; top:8px; right:8px; z-index:2">
+                        Fora de cartaz
+                    </span>
                 </div>
-                <span th:if="${!filme.isEmCartaz()}" sec:authorize="hasRole('ADMIN')"
-                      class="badge-cancelada" style="position:absolute; top:8px; right:8px; z-index:2">
-                    Fora de cartaz
-                </span>
-            </div>
-            <div class="film-card-body">
-                <div class="film-card-title" th:text="${filme.titulo}">Título</div>
-                <div class="d-flex gap-1 flex-wrap mb-2">
-                    <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
+                <div class="film-card-body">
+                    <div class="film-card-title" th:text="${filme.titulo}">Título</div>
+                    <div class="d-flex gap-1 flex-wrap mb-2">
+                        <span th:each="g : ${filme.generos}" class="badge-genero" th:text="${g.nome}"></span>
+                    </div>
+                    <div class="film-card-meta">
+                        <span th:if="${filme.duracao != null}" th:text="${filme.getDuracaoFormatada()}">2h</span>
+                        <span th:if="${filme.classificacao != null}" class="badge-genero" th:text="${filme.classificacao}">14+</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="film-card-price" th:text="'R$ ' + ${filme.getPrecoFormatado()}">R$ 25,00</span>
+                        <span class="text-accent" style="font-size:0.8rem">Ver sessões →</span>
+                    </div>
                 </div>
-                <div class="film-card-meta">
-                    <span th:if="${filme.duracao != null}" th:text="${filme.getDuracaoFormatada()}">2h</span>
-                    <span th:if="${filme.classificacao != null}" class="badge-genero" th:text="${filme.classificacao}">14+</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="film-card-price" th:text="'R$ ' + ${filme.getPrecoFormatado()}">R$ 25,00</span>
-                    <span class="text-accent" style="font-size:0.8rem">Ver sessões →</span>
-                </div>
-            </div>
-        </a>
+            </a>
+        </div>
+        <button type="button" class="carousel-arrow carousel-arrow-right" aria-label="Próximo">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
 
     <div th:if="${filmes.empty}" class="text-center py-5">
@@ -85,19 +93,12 @@
         <h4 class="text-dim mt-3">Nenhum filme encontrado</h4>
         <a th:href="@{/filmes}" class="text-accent">Ver todos os filmes</a>
     </div>
-
-    <nav th:if="${totalPaginas > 1}" class="d-flex flex-wrap justify-content-center gap-2 py-4">
-        <a th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
-           th:href="@{/filmes(page=${i}, q=${q}, generoId=${generoId})}"
-           class="genre-chip"
-           th:classappend="${i == paginaAtual} ? ' active' : ''"
-           th:text="${i + 1}">1</a>
-    </nav>
 </div>
 
 <footer class="cinema-footer">
     <div class="container">&copy; 2025 CinemaApp. Todos os direitos reservados.</div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/carousel.js}"></script>
 </body>
 </html>

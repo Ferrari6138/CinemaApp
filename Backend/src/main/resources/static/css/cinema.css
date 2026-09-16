@@ -129,13 +129,59 @@ img { max-width: 100%; }
   border-color: var(--text-secondary);
 }
 
-/* ============ FILM CARDS ============ */
-.film-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem 0;
+/* ============ FILM CARDS / CAROUSEL ============ */
+.film-carousel {
+  position: relative;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
 }
+.film-carousel-track {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  padding: 1.5rem 0.25rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.film-carousel-track::-webkit-scrollbar { display: none; }
+.film-carousel-track .film-card {
+  flex: 0 0 auto;
+  width: 200px;
+  scroll-snap-align: start;
+}
+.carousel-arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15%;
+  min-width: 44px;
+  max-width: 90px;
+  border: none;
+  background: none;
+  color: white;
+  font-size: 1.6rem;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+}
+.carousel-arrow-left {
+  left: 0;
+  justify-content: flex-start;
+  background: linear-gradient(to right, rgba(13,13,13,0.95) 20%, transparent);
+}
+.carousel-arrow-right {
+  right: 0;
+  justify-content: flex-end;
+  background: linear-gradient(to left, rgba(13,13,13,0.95) 20%, transparent);
+}
+.carousel-arrow i { padding: 0 0.75rem; }
+.carousel-arrow.visible { opacity: 1; pointer-events: auto; }
 .film-card {
   background: var(--bg-card);
   border-radius: 12px;
@@ -617,7 +663,9 @@ img { max-width: 100%; }
 }
 
 @media (max-width: 768px) {
-  .film-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.85rem; }
+  .film-carousel-track .film-card { width: 150px; }
+  .film-carousel-track { gap: 0.85rem; }
+  .carousel-arrow { min-width: 36px; }
   .film-hero { min-height: 280px; }
   .film-hero-poster { width: 130px; }
   .film-hero-content { padding: 1.25rem 0 1rem; }
@@ -633,7 +681,8 @@ img { max-width: 100%; }
 }
 
 @media (max-width: 480px) {
-  .film-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.6rem; }
+  .film-carousel-track .film-card { width: 128px; }
+  .film-carousel-track { gap: 0.6rem; }
   .film-hero { min-height: 240px; }
   .film-hero-poster { width: 100px; }
   .seat { width: 22px; height: 20px; font-size: 0.5rem; }
